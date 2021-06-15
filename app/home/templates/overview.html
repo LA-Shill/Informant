@@ -1,0 +1,795 @@
+{% extends 'layouts/base_template.html' %}
+{% set active_page = "Overview" %}
+
+<style>
+
+    .card-margin {
+        margin-bottom: 1.875rem;
+    }
+    .card {
+        border: 0;
+        box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+        -webkit-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+        -moz-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+        -ms-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+    }
+    .card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: #ffffff;
+        background-clip: border-box;
+        border: 1px solid #e6e4e9;
+        border-radius: 8px;
+    }
+    
+</style>
+
+{% block body %}
+{% include 'layouts/nav.html' %}
+
+
+
+
+<button class="btn btn-outline-none" style="margin-left:20px" type="button" onclick="window.location.href='{{ url_for('home_bp.home') }}'"><i class="fa fa-arrow-left"></i></button>
+<div class="jumbotron vertical-center">
+    <div class="container text-center">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    <div style="margin: 15px">
+        <h1>{{scan_name}} </h1> <a style="text-decoration: none; color:black;" data-toggle="modal" data-target="#form" role="button"><span><i class="fa fa-cog" aria-hidden="true"></i></span></a><a style="text-decoration: none; color:black;" data-toggle="modal" data-target="#del_form" role="button"> <span><i class="fa fa-trash-alt" aria-hidden="true"></i></span></a>
+        <div id="statustop"></div>
+    </div>
+    <div class="row">
+        <div class="col-xl-3 col-lg-6">
+           <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                 <div class="row">
+                    <div class="col">
+                       <h5 class="card-title text-uppercase text-muted mb-0">Total Assets</h5>
+                       <span id="total_assets" class="h2 font-weight-bold mb-0"></span>
+                    </div>
+                    <div class="col-auto">
+                       <div class="icon icon-shape bg-primary text-white rounded-circle shadow">
+                          <i class="fas fa-server"></i>
+                       </div>
+                    </div>
+                 </div>
+                 <p id="total_change" class="mt-3 mb-0 text-muted text-sm">
+                 </p>
+              </div>
+           </div>
+        </div>
+        <div class="col-xl-3 col-lg-6">
+           <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                 <div class="row">
+                    <div class="col">
+                       <h5 class="card-title text-uppercase text-muted mb-0">Secure Assets</h5>
+                       <span id="secure_assets" class="h2 font-weight-bold mb-0"></span>
+                    </div>
+                    <div class="col-auto">
+                       <div class="icon icon-shape bg-success text-white rounded-circle shadow">
+                          <i class="fas fa-lock"></i>
+                       </div>
+                    </div>
+                 </div>
+                 <p id="secure_change" class="mt-3 mb-0 text-muted text-sm">
+                 </p>
+              </div>
+           </div>
+        </div>
+        <div class="col-xl-3 col-lg-6">
+           <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                 <div class="row">
+                    <div class="col">
+                       <h5 class="card-title text-uppercase text-muted mb-0">Identified Risks</h5>
+                       <span id="risky_assets" class="h2 font-weight-bold mb-0"></span>
+                    </div>
+                    <div class="col-auto">
+                       <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
+                          <i class="fas fa-lock-open"></i>
+                       </div>
+                    </div>
+                 </div>
+                 <p id="risky_change" class="mt-3 mb-0 text-muted text-sm">
+                 </p>
+              </div>
+           </div>
+        </div>
+        <div class="col-xl-3 col-lg-6">
+           <div class="card card-stats mb-4 mb-xl-0">
+              <div class="card-body">
+                 <div class="row">
+                    <div class="col">
+                       <h5 class="card-title text-uppercase text-muted mb-0">Default Configs</h5>
+                       <span id="default_config" class="h2 font-weight-bold mb-0"></span>
+                    </div>
+                    <div class="col-auto">
+                       <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                          <i class="fas fa-skull-crossbones"></i>
+                       </div>
+                    </div>
+                 </div>
+                 <p id="default_change" class="mt-3 mb-0 text-muted text-sm">
+                 </p>
+              </div>
+           </div>
+        </div>
+     </div>
+
+     
+     <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content py-md-5 px-md-4 p-sm-3 p-4">
+             <h3>Project Settings</h3>
+              <a id="stats" href=""><i data-tippy-content="Project Statistics (Experimental)"  class="fas fa-chart-bar fa-xs text-success"></i></a>
+              <form method="POST" action="{{ url_for('home_bp.project_settings', project_name=scan_name) }}">
+               {{ project_settings.csrf_token }}
+               <h5 class="card-title text-uppercase text-muted mt-2">Project Title <i data-tippy-content="Uniquely identifiable project name" class="fas fa-info-circle fa-xs"></i></h5>
+               {{ project_settings.project_name(class='form-control form-control-lg', placeholder='New project name', style="text-align:center", value=scan_name) }}
+               <h5 class="card-title text-uppercase text-muted mt-2">Scan Range <i data-tippy-content="Valid IP or CIDR" class="fas fa-info-circle fa-xs"></i> </h5>
+               {{ project_settings.scan_range(class='form-control form-control-lg', placeholder='Enter a Domain, IP or CIDR', style="text-align:center", value=scan_r) }}
+               <h5 class="card-title text-uppercase text-muted mt-2">Max Records <i data-tippy-content="Between 1 and 1000" class="fas fa-info-circle fa-xs"></i></h5> 
+               {{ project_settings.max_records(class='form-control form-control-lg', placeholder='Max records', style="text-align:center", value=max_records) }}
+               <p class="mt-2">Please note, all projects must have a unique project name.</p>
+               <div class="text-center"> <button class="btn btn-primary w-50 rounded-pill b1 m-3" type="submit">Update</button> </div> <button data-dismiss="modal" class="btn btn-danger w-50 rounded-pill b1">Cancel</button>
+              </form>
+          </div>
+      </div>
+    </div>
+    
+    <div class="modal fade" id="del_form" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content py-md-5 px-md-4 p-sm-3 p-4">
+             <h3>Delete Project</h3>
+              <form method="POST" action="{{ url_for('home_bp.project_del', project_name=scan_name) }}">
+               {{ project_settings.csrf_token }}
+               <p class="mt-2 text-danger">You will not be able to recover project data after deletion!</p>
+               <h5 class="card-title text-uppercase text-muted mt-2">Confirm project name <i data-tippy-content="Please enter the full project name to confirm you would like to fully delete the project and related data" class="fas fa-info-circle fa-xs"></i></h5> 
+               {{ project_del.project_name(class='form-control form-control-lg', placeholder='Project Name', style="text-align:center") }}
+               <div class="text-center"> <button class="btn btn-primary w-50 rounded-pill b1 m-3" type="submit">Confirm Action</button> </div> <button data-dismiss="modal" class="btn btn-danger w-50 rounded-pill b1">Cancel</button>
+              </form>
+          </div>
+      </div>
+    </div>
+
+    
+
+     <div class="col">
+      <div class="card mb-3">
+        <h6 class="mt-2" >Timeline</h6>
+        <div class="mb-3" id="date_range_slider"></div>
+      </div>
+    </div>
+   <div class="main-body">  
+     <div class="row gutters-sm">
+       <div class="col-md-4 mb-3">
+         <div class="card">
+           <div class="card-body">
+             <div class="d-flex flex-column align-items-center text-center">
+               
+                          <div class="col-auto">
+                         <div class="icon icon-shape bg-secondary text-white rounded-circle shadow">
+                            <i class="fas fa-redo"></i>
+                         </div>
+                      </div>
+                      
+               <div class="mt-3">
+                 <h4>Asset Discovery Scan </h4>
+                 <p class="text-secondary mb-1">Discovery new assets 🚀 <i data-tippy-content="Manually perform a new asset scan" class="fas fa-info-circle fa-xs"></i></p>
+
+           <form method="POST" action="/discovery/{{scan_name}}">
+            {{ a_rescan_form.csrf_token }}
+              <div class="col-auto" style="padding:5px">
+                   <select class="selectpicker"  id='options' name='options' title="Options"  multiple data-selected-text-format="count > 2">
+                     <optgroup label="IWS">
+                       <option>Shodan</option>
+                       <option>Censys</option>
+                       <option>BinaryEdge</option>
+                       <option>Onyphe</option>
+                     </optgroup>
+                     <optgroup label="PDNS">
+                       <option>ThreatCrowd</option>
+                       <option>ThreatMiner</option>
+                       <option>Robtex</option>
+                       <option>Daloo</option>
+                       <option>FarSight</option>
+                       <option>DNSGrep</option>
+                     </optgroup>
+                         <optgroup label="EXTRA">
+                       <option disabled>GEO Validation (Active)</option>
+                     </optgroup>
+                   </select>
+             </div>
+              <div class="col-auto">
+                <button class="btn btn-lg btn-primary" type="submit">Scan</button>
+             </div>
+           </form>
+               </div>
+             </div>
+           </div>
+         </div>
+         
+                       <div class="card">
+           <div class="card-body">
+             <div class="d-flex flex-column align-items-center text-center">
+               
+                          <div class="col-auto">
+                         <div class="icon icon-shape bg-dark text-white rounded-circle shadow">
+                            <i class="fas fa-bug"></i>
+                         </div>
+                      </div>
+                      
+               <div class="mt-3">
+                 <h4>Risk Assessment</h4>
+                 <p class="text-secondary mb-1">Assess assets for risks 💀 <i data-template-id="center-tip" data-tippy-content="Manually perform a risk assessments on your latest assest" class="fas fa-info-circle fa-xs"></i></p>
+            <form method="POST" action="/assess/{{scan_name}}">
+                {{ risk_rescan_form.csrf_token }}
+              <div class="col-auto" style="padding:5px">
+                   <select class="selectpicker"  id='options' name='options' title="Options"  multiple data-selected-text-format="count > 2">
+                     <optgroup label="IWS">
+                       <option>Vulnerability Assessment</option>
+                     </optgroup>
+                     <optgroup label="PDNS">
+                       <option>DNS Risk Assessment</option>
+                     </optgroup>
+                   </select>
+             </div>
+              <div class="col-auto">
+                <button class="btn btn-lg btn-primary" type="submit">Scan</button>
+             </div>
+           </form>
+               </div>
+             </div>
+           </div>
+         </div>
+         
+       </div>
+
+
+
+
+       <div class="col-md-8">
+         <div class="card mb-3">
+               <div class="card-body">
+                <div id="clear"></div>
+                   <table class="table table-striped" style="width:100%">
+                       <thead>
+                           <tr>
+                               <th>Task</th>
+                               <th>Timestamp</th>
+                               <th>Status</th>
+                           </tr>
+                       </thead>
+                       <tbody id="queue">
+                       </tbody>
+                   </table>
+               </div>
+         </div>
+       </div>
+
+
+
+
+       <script>
+         
+        setInterval(function(){$.ajax({
+            url: '/taskqueue',
+            type: 'POST',
+            success: function(response) {
+                var i = 0;
+                var html, color, clear, running, statustop = '';
+                var d = new Date().toLocaleString()
+
+                if (response['scan_running']) {
+                  html+= '<tr><td><div class="icon icon-shape bg-success text-white rounded-circle shadow"><i class="fas fa-check-circle"></i></div></td><td><span class="mt-3"> System is busy! A scan is in progress! </span></td><td><span class="mt-3 badge bg-success">Running</span></td></tr>'
+                  statustop = '<span class="badge bg-warning my-2">System Busy</span>'
+                } else {
+                  statustop = '<span class="badge bg-success my-2">System Ready</span>'
+                }
+
+                if (response["jobs"].length > 0) {
+                  for (i = 0; i < response["jobs"].length; i++) {
+                    if(response["jobs"][i]["icon"] == 'redo'){
+                      color = 'secondary'
+                    } else {
+                      color = 'dark'
+                    }
+                    if(response["jobs"][i]["host"] == '{{scan_name}}'){
+                      clear = '<form style="float:right;"action="/clearscans/{{scan_name}}" method="POST"> <button value="" name="key" class="btn btn-danger btn-sm d-none d-sm-inline-block" type="submit"><i class="fas fa-ban"></i></button></form>'
+                      html+= '<tr><td><div class="icon icon-shape bg-' + color + ' text-white rounded-circle shadow"><i class="fas fa-' + response["jobs"][i]["icon"] + '"></i></div></td><td>' + response["jobs"][i]["created_at"] + '</td><td><span class="mt-3 badge bg-success">'+ response["jobs"][i]["state"] + '</span></td></tr>'
+                    }
+                  }
+
+                  
+                  if (response["jobs"].length > 1) {
+                      html += '<tr><td><div class="icon icon-shape bg-info text-white rounded-circle shadow"><i class="fas fa-stopwatch"></i></div></td><td><span class="mt-3">' + d + '</span></td><td>Queue Size: <span class="mt-3 badge bg-info">' + response["jobs"].length + '</span></td></tr>'
+                    }
+
+                } else {
+                  html += '<tr><td><div class="icon icon-shape bg-warning text-white rounded-circle shadow"><i class="fas fa-times"></i></div></td><td><span class="mt-3">' + d + '</span></td><td><span class="mt-3 badge bg-warning">Empty Queue</span></td></tr>'
+                }
+                $("#queue").html(html);
+                $("#clear").html(clear);
+                $("#statustop").html(statustop);
+            },
+            error: function(error) {
+                console.log(error);
+            }
+        })}, 1000);
+    </script>
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="col">
+         <div class="card mb-3">
+               <div class="card-body">
+               
+               
+                                              <div class="result-header">
+                               <div class="row">
+                                   <div class="col-lg-12">
+
+                                       <div class="result-actions">
+                                           <div class="result-sorting">
+                                           </div>
+                                           <div class="result-views">
+                                           <div class="dropdown">
+                                               <button type="button"  id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-soft-base btn-icon dropdown-toggle">
+                                                   <svg
+                                                       xmlns="http://www.w3.org/2000/svg"
+                                                       width="24"
+                                                       height="24"
+                                                       viewBox="0 0 24 24"
+                                                       fill="none"
+                                                       stroke="currentColor"
+                                                       stroke-width="2"
+                                                       stroke-linecap="round"
+                                                       stroke-linejoin="round"
+                                                       class="feather feather-grid"
+                                                   >
+                                                       <rect x="3" y="3" width="7" height="7"></rect>
+                                                       <rect x="14" y="3" width="7" height="7"></rect>
+                                                       <rect x="14" y="14" width="7" height="7"></rect>
+                                                       <rect x="3" y="14" width="7" height="7"></rect>
+                                                   </svg>
+                                               </button>
+                                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                              <a class="dropdown-item" href="{{ url_for('home_bp.pdns', project_name=scan_name) }}">Raw data</a>
+                                              <a class="dropdown-item" id="network_map_pdns" href="">Generate Diagram</a>
+                                              <a class="dropdown-item" id="pdns_risks_export" href="">Export Data</a>
+                                             </div>
+                                           </div>
+                                           
+                                           
+                                       
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>
+                   <h3>Risky PDNS Results</h3>
+                   <table id="PDNS_Table" class="table dt-responsive table-striped dataTable no-footer dtr-inline"  cellspacing="0" width="100%" role="grid">
+                    <thead>
+                      <tr>
+                        <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">Timestamp</th>
+                        <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">Source</th>
+                        <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">ASN</th>
+                        <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">Netname</th>
+                        <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">Destination</th>
+                        <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">First Seen</th>
+                        <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">Last Seen</th>
+                        <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">Count</th>
+                        <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 67.5px;" aria-label="Salary: activate to sort column ascending">Flags</th>
+                      </tr>
+                    </thead>
+                  </table>
+               </div>
+         </div>
+</div>
+
+
+<div class="col">
+         <div class="card mb-3">
+               <div class="card-body">
+               
+                          <div class="result-header">
+                               <div class="row">
+                                   <div class="col-lg-12">
+
+                                       <div class="result-actions">
+                                           <div class="result-sorting">
+                                           </div>
+                                           <div class="result-views">
+                                           <div class="dropdown">
+                                               <button type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-soft-base btn-icon dropdown-toggle">
+                                                   <svg
+                                                       xmlns="http://www.w3.org/2000/svg"
+                                                       width="24"
+                                                       height="24"
+                                                       viewBox="0 0 24 24"
+                                                       fill="none"
+                                                       stroke="currentColor"
+                                                       stroke-width="2"
+                                                       stroke-linecap="round"
+                                                       stroke-linejoin="round"
+                                                       class="feather feather-grid"
+                                                   >
+                                                       <rect x="3" y="3" width="7" height="7"></rect>
+                                                       <rect x="14" y="3" width="7" height="7"></rect>
+                                                       <rect x="14" y="14" width="7" height="7"></rect>
+                                                       <rect x="3" y="14" width="7" height="7"></rect>
+                                                   </svg>
+                                               </button>
+                                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                               <a class="dropdown-item" href="{{ url_for('home_bp.iws', project_name=scan_name) }}">Raw data</a>
+                                               <a class="dropdown-item" id="network_map_iws" href="">Generate Diagram</a>
+                                               <a class="dropdown-item" id="iws_risks_export" href="">Export Data</a>
+                                             </div>
+                                           </div>
+                                           
+                                           
+                                       
+                                           </div>
+                                       </div>
+                                   </div>
+                               </div>
+                           </div>		<h3>Risky IWS Results</h3>
+                           <table id="IWS_Table" class="table dt-responsive table-striped dataTable no-footer dtr-inline"  cellspacing="0" width="100%" role="grid">
+                            <thead>
+                              <tr>
+                                <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">Timestamp</th>
+                                <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">IP</th>
+                                <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">ASN</th>
+                                <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">Domains</th>
+                                <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">Organisation</th>
+                                <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">Country</th>
+                                <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 125.5px;" aria-label="Name: activate to sort column ascending">OS</th>
+                                <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 67.5px;" aria-label="Salary: activate to sort column ascending">Ports</th>
+                                <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 67.5px;" aria-label="Salary: activate to sort column ascending">Risky Services</th>
+                                <th class="sorting" tabindex="0" aria-controls="example" rowspan="1" colspan="1" style="width: 67.5px;" aria-label="Salary: activate to sort column ascending">Flags</th>
+                              </tr>
+                            </thead>
+                          </table>
+               </div>
+         </div>
+</div>
+
+
+<script>
+  $(document).ready(function () {
+      var date_lr = "{{last_run}}".split('-');
+      last_run = new Date(date_lr[0], date_lr[1] - 1, date_lr[2].substring(0, 2)); 
+
+      var date_lr = "{{first_run}}".split('-');
+      first_run = new Date(date_lr[0], date_lr[1] - 1, (date_lr[2].substring(0, 2)) -1); 
+
+      timeline_range = [first_run.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'}), last_run.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'})];
+      $("#network_map_pdns").attr('href','/overview/{{scan_name}}/map/' + timeline_range);
+      $("#iws_risks_export").attr('href','/export/{{scan_name}}/iws_risks/' + timeline_range);
+      $("#pdns_risks_export").attr('href','/export/{{scan_name}}/pdns_risks/' + timeline_range);
+      $("#network_map_iws").attr('href','/overview/{{scan_name}}/map/' + timeline_range);
+      $("#stats").attr('href','/overview/{{scan_name}}/' + timeline_range + '/stats');
+      var counter = 1;
+      
+
+        $("#date_range_slider").dateRangeSlider(
+          { 
+            bounds: {
+              min: first_run, // first_run date
+              max: last_run  // last_run date
+            },
+            defaultValues:{
+              min: first_run, // last_run date
+              max: last_run  // last_run date
+            },
+            range:{
+              min: {days: 1},
+              max: {days: 30}
+            },
+            enabled: true
+          }
+        );
+
+     var table_0 = $('#PDNS_Table').DataTable({
+        "language": {
+            "emptyTable": "No Risky PDNS Records Detected."
+        },
+        "dom": 'lfrtip',
+        bProcessing: true,
+        bServerSide: true,
+        sPaginationType: "full_numbers",
+        lengthMenu: [[10, 25, 50, 100, 250, 500], [10, 25, 50, 100, 250, 500]],
+        bjQueryUI: true,
+        sAjaxSource: '/tables/PDNS_0/{{scan_name}}/' + timeline_range,
+        columns: [
+        {"data": "timestamp"},
+        {"data": "Source"},
+        {"data": "ASN"},
+        {"data": "Netname"},
+        {"data": "Destination"},
+        {"data": "first_seen"},
+        {"data": "last_seen"},
+        {"data": "Count"},
+        {"data": "flagged",
+        "render": function(data)
+            {
+                if (data) {
+                    return '<span class="m-2 badge bg-warning my-2">External ASN (Review)</span>';
+                } else {
+                    return ' ';
+                }
+            }
+        }
+        ]
+    });
+
+
+  var table = $('#IWS_Table').DataTable({
+      "language": {
+          "emptyTable": "No Risky IWS Records Detected."
+      },
+      "dom": 'lfrtip',
+      bProcessing: true,
+      bServerSide: true,
+      sPaginationType: "full_numbers",
+      lengthMenu: [[10, 25, 50, 100, 250, 500], [10, 25, 50, 100, 250, 500]],
+      bjQueryUI: true,
+      sAjaxSource: '/tables/IWS_0/{{scan_name}}/'+ timeline_range,
+      columns: [
+      {"data": "timestamp"},
+      {"data": "IP",
+        "render": function(data)
+            {
+              return '<a href="/overview/{{scan_name}}/view/' + data + '/' + timeline_range + '">' + data + '<a/>';
+        }
+      },
+      {"data": "ASN"},
+      {"data": "Domains",
+        "render": function(data)
+            {
+              var domains = '';
+                if (data) {
+                    for (i = 0; i < data.length; i++) {
+                      domains += data[i] + "<br>";
+                    }
+                    return domains;
+                } else {
+                    return ' ';
+                }
+            }
+        },
+      {"data": "Organisation"},
+      {"data": "Country"},
+      {"data": "OS",
+        "render": function(data)
+            {
+              var os = '';
+                if (data) {
+                  if (data.constructor === Array) {
+                    for (i = 0; i < data.length; i++) {
+                      os += data[i] + "<br>";
+                    }
+                  } else {
+                    os = data;
+                  }
+                    return os;
+                } else {
+                    return ' ';
+                }
+            }
+        },
+        {"data": "Ports",
+        "render": function(data)
+            {
+              var os = '';
+                if (data) {
+                    for (i = 0; i < data.length; i++) {
+                      os += data[i] + "<br>";
+                    }
+                    return os;
+                } else {
+                    return ' ';
+                }
+            }
+        },
+        {"data": "Services",
+        "render": function(data)
+            {
+              console.log(data)
+              var services = ''
+              var tmp = ''
+                if (data) {
+                  for (x = 0; x < data.length; x++) {
+                    for (i = 0; i < data[x].length; i++) {
+                      if ('manufacturer' in data[x][i]){
+                        tmp = ''
+                        tmp += data[x][i]['manufacturer'];
+                      }
+                      if ('product' in data[x][i]) {
+                        tmp += ' ' + data[x][i]['product'];
+                      }
+                      if ('version' in data[x][i]) {
+                        tmp += ' ' + data[x][i]['version'];
+                      }
+                      if ('port' in data[x][i]) {
+                        tmp += ' (' + data[x][i]['port'] + ')';
+                      }
+                    tmp += "<br><b> " + data[x].length + " issues </b><br><br>";
+                  }
+                  services += tmp;
+                }
+                return services;
+                } else {
+                    return 'None 👍';
+                }
+            }
+        },
+        {"data": "Flags",
+        "render": function(data)
+            {
+                if (data) {
+                  var msg = ''
+                  // Return high risk ports and default configs
+                  for (x = 0; x < data.length; x++) {
+                    if('ports' in data[x]) {
+                      msg += '<span class="m-2 badge bg-warning my-2">High Risk Ports (' + data[x]['ports'] + ')</span><br>';
+                    }
+                    if('default' in data[x]) {
+                      msg += '<a title="Affected service: ' + data[x]['cve']['manufacturer'] + " " + data[x]['cve']['vendor'] +  " " + data[x]['cve']['product'] + " " + data[x]['cve']['version'] + ' (' + data[x]['cve']['port'] + ')' + '"class="text-white text-decoration-none" target="_blank" href="https://nvd.nist.gov/vuln/detail/' + data[x]['cve']['cve'] + '">' + '<span class="m-2 badge bg-danger my-2">DF (' + data[x]['cve']['cve'] + ')</span></a><br>';
+                    }
+                    if('obfuscated' in data[x]){
+                      msg += '<span title="Affected service: ' + data[x]['service']['manufacturer'] + " " + data[x]['service']['vendor'] +  " " + data[x]['service']['product'] + " " + data[x]['service']['version'] + '"class="m-2 badge bg-info my-2">Obfuscated Service (' + data[x]['service']['port'] + ')</span><br>';
+                    }
+                    
+                    if('rddos' in data[x]){
+                      msg += '<span title="Affected ports: ' + data[x]['port'] + '"class="m-2 badge bg-secondary my-2">rDDoS Potential (' + data[x]['rDDoS_BAF'] + ')</span><br>';
+                    }
+
+                    if('verification' in data[x]) {
+                      if (data[x]['verification']) {
+                        msg += '<span class="m-2 badge bg-success my-2">Location Verified</span><br>';
+                      } else {
+                        msg += '<span class="m-2 badge bg-danger my-2">Location Spoofed</span><br>';
+                      }
+                    }
+                  }
+                    return msg
+                } else {
+                    return '  ';
+                }
+            }
+        }
+      ]
+  });
+
+  function updateStats() {
+              // Update stats
+            $.ajax({url: "/stats/{{scan_name}}/IWS_0/" + timeline_range, type: 'POST', success: function(result){
+            $("#total_assets").html(result['stats']['totalAssets']);
+            $("#secure_assets").html(result['stats']['secureAssets']);
+            $("#risky_assets").html(result['stats']['riskyAssets']);
+            $("#default_config").html(result['stats']['defaultConfig']);
+            
+
+            if (result['stats']['totalAssets_change'] > 0) {
+              
+              var totalAssets = '<span class="text-success mr-2"><i class="fa fa-arrow-up"></i> ' + result['stats']['totalAssets_change'] + '%</span> <span class="text-nowrap">Change over time</span>'
+            } else if (result['stats']['totalAssets_change'] == 0) {
+              var totalAssets = '<span class="text-nowrap">No change 📈 </span>'
+            } else {
+              var totalAssets = '<span class="text-danger mr-2"><i class="fa fa-arrow-down"></i> ' +   (result['stats']['totalAssets_change'] * -1) + '%</span> <span class="text-nowrap">Change over time</span>'
+            }
+
+            if (result['stats']['secureAssets_change'] > 0) {
+              
+              var secureAssets_change = '<span class="text-success mr-2"><i class="fa fa-arrow-up"></i> ' + result['stats']['secureAssets_change'] + '%</span> <span class="text-nowrap">Change over time</span>'
+            } else if (result['stats']['secureAssets_change'] == 0) {
+              var secureAssets_change = '<span class="text-nowrap">No change 📈 </span>'
+            }else {
+              var secureAssets_change = '<span class="text-danger mr-2"><i class="fa fa-arrow-down"></i> ' +   (result['stats']['secureAssets_change'] * -1) + '%</span> <span class="text-nowrap">Change over time</span>'
+            }
+
+            if (result['stats']['riskyAssets_change'] > 0) {
+              
+              var riskyAssets_change = '<span class="text-success mr-2"><i class="fa fa-arrow-up"></i> ' + result['stats']['riskyAssets_change'] + '%</span> <span class="text-nowrap">Change over time</span>'
+            } else if (result['stats']['riskyAssets_change'] == 0) {
+              var riskyAssets_change = '<span class="text-nowrap">No change 📈 </span>'
+            } else {
+              var riskyAssets_change = '<span class="text-danger mr-2"><i class="fa fa-arrow-down"></i> ' +   (result['stats']['riskyAssets_change'] * -1) + '%</span> <span class="text-nowrap">Change over time</span>'
+            }
+
+            if (result['stats']['defaultAssets_change'] > 0) {
+              
+              var defaultAssets_change = '<span class="text-success mr-2"><i class="fa fa-arrow-up"></i> ' + result['stats']['defaultAssets_change'] + '%</span> <span class="text-nowrap">Change over time</span>'
+            } else if (result['stats']['defaultAssets_change'] == 0) {
+              var defaultAssets_change = '<span class="text-nowrap">No change 📈 </span>'
+            }else {
+              var defaultAssets_change = '<span class="text-danger mr-2"><i class="fa fa-arrow-down"></i> ' +   (result['stats']['defaultAssets_change'] * -1) + '%</span> <span class="text-nowrap">Change over time</span>'
+            }
+            
+            $("#total_change").html(totalAssets);
+            $("#secure_change").html(secureAssets_change);
+            $("#risky_change").html(riskyAssets_change);
+            $("#default_change").html(defaultAssets_change);
+          }});
+
+  }
+
+  $("#date_range_slider").bind("valuesChanged", function(e, data){
+          timeline_range = [data.values.min.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'}), data.values.max.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'})]
+          updateStats()
+          $("#network_map_pdns").attr('href','/overview/{{scan_name}}/map/' + timeline_range);
+          $("#iws_risks_export").attr('href','/export/{{scan_name}}/iws_risks/' + timeline_range);
+          $("#pdns_risks_export").attr('href','/export/{{scan_name}}/pdns_risks/' + timeline_range);
+          $("#network_map_iws").attr('href','/overview/{{scan_name}}/map/' + timeline_range);
+          $("#stats").attr('href','/overview/{{scan_name}}/' + timeline_range + '/stats');
+          table.ajax.url('/tables/IWS_0/{{scan_name}}/' + timeline_range).load();
+          table_0.ajax.url('/tables/PDNS_0/{{scan_name}}/' + timeline_range).load();
+          //table.ajax.reload();
+        });
+        updateStats()
+        
+  });
+
+  tippy('[data-tippy-content]');
+
+  
+</script>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+
+{% endblock %}

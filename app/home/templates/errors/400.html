@@ -1,0 +1,14 @@
+{% extends 'layouts/base_template.html' %}
+{% set active_page = "400" %}
+{% include 'layouts/nav.html' %}
+{% block body %}
+                <div class="container-fluid">
+                    <div class="text-center mt-5">
+                        <div class="error mx-auto" data-text="404">
+                            <p class="m-0">400</p>
+                        </div>
+                        <p class="text-dark mb-5 lead">Bad Request</p>
+                        <p class="text-black-50 mb-0">It looks like you found a glitch in the matrix...</p><a href="/">← Back to Dashboard</a>
+                    </div>
+                </div>
+{% endblock %}

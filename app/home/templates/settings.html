@@ -1,0 +1,206 @@
+{% extends 'layouts/base_template.html' %}
+{% set active_page = "Settings" %}
+
+<style>
+
+   .card-margin {
+       margin-bottom: 1.875rem;
+   }
+   .card {
+       border: 0;
+       box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+       -webkit-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+       -moz-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+       -ms-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+   }
+   .card {
+       position: relative;
+       display: flex;
+       flex-direction: column;
+       min-width: 0;
+       word-wrap: break-word;
+       background-color: #ffffff;
+       background-clip: border-box;
+       border: 1px solid #e6e4e9;
+       border-radius: 8px;
+   }
+   
+</style>
+
+{% block body %}
+{% include 'layouts/nav.html' %}
+<button class="btn btn-outline-none" style="margin-left:20px" type="button" onclick="window.location.href='{{ url_for('home_bp.home') }}'"><i class="fa fa-arrow-left"></i></button>
+<div class="jumbotron vertical-center">
+   <div class="container text-center">
+      <form class="card card-sm" method="POST" action="/settings">
+        {{ form.csrf_token }}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible" role="alert">
+              {{ message }}
+          </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+         <div class="card-body row no-gutters align-items-center">
+            <h4>IWS Settings</h4>
+            <div class="input-group mb-3">
+               <label>
+               <b>Shodan</b>
+               </label>
+               <div class="input-group">
+                  <div class="input-group-append">
+                     <button class="btn btn-outline-secondary" type="button" id="shodanApiKey"><i class="fa fa-key"></i></button>
+                  </div>
+                  <input type="text" class="form-control" id="shodanApiKey" name="shodanApiKey"  placeholder="Your Shodan API Key" aria-describedby="shodanApiKey" value="{{standard['SHODAN_API_KEY']}}">
+                  {% if form.shodanApiKey.errors %}
+                    {% for error in form.shodanApiKey.errors %}
+                      <div class="invalid-feedback">
+                          {{error}}
+                      </div>
+                    {%endfor%}
+                  {% endif %}
+               </div>
+            </div>
+            <div class="input-group mb-3">
+               <label>
+               <b>Censys</b>
+               </label>
+               <div class="input-group">
+                  <div class="input-group-append">
+                     <button class="btn btn-outline-secondary" type="button" id="censysUID"><i class="fa fa-user"></i></button>
+                  </div>
+                  <input type="text" class="form-control " id="censysUID" name="censysUID"  placeholder="Your Censys ID Key" aria-describedby="censysUID" value="{{standard.CENSYS_API_ID}}">
+                  {% if form.censysUID.errors %}
+                  {% for error in form.censysUID.errors %}
+                    <div class="invalid-feedback">
+                        {{error}}
+                    </div>
+                  {%endfor%}
+                {% endif %}
+               </div>
+            </div>
+            <div class="input-group mb-3">
+               <div class="input-group">
+                  <div class="input-group-append">
+                     <button class="btn btn-outline-secondary" type="button" id="censysApiKey"><i class="fa fa-key"></i></button>
+                  </div>
+                  <input type="text" class="form-control" id="censysApiKey" name="censysApiKey"  placeholder="Your Censys API Key" aria-describedby="censysApiKey" value="{{standard.CENSYS_API_SECRET}}">
+                  {% if form.censysApiKey.errors %}
+                  {% for error in form.censysApiKey.errors %}
+                    <div class="invalid-feedback">
+                        {{error}}
+                    </div>
+                  {%endfor%}
+                {% endif %}
+                </div>
+            </div>
+            <div class="input-group mb-3">
+               <label>
+               <b>BinaryEdge</b>
+               </label>
+               <div class="input-group">
+                  <div class="input-group-append">
+                     <button class="btn btn-outline-secondary" type="button" id="beApiKey"><i class="fa fa-key"></i></button>
+                  </div>
+                  <input type="text" class="form-control" id="beApiKey" name="beApiKey"  placeholder="Your BinaryEdge API Key" aria-describedby="beApiKey" value="{{standard.BINARY_EDGE_API_KEY}}">
+                  {% if form.beApiKey.errors %}
+                  {% for error in form.beApiKey.errors %}
+                    <div class="invalid-feedback">
+                        {{error}}
+                    </div>
+                  {%endfor%}
+                {% endif %}
+                </div>
+            </div>
+            <div class="input-group mb-3">
+               <label>
+               <b>Onyphe</b>
+               </label>
+               <div class="input-group">
+                  <div class="input-group-append">
+                     <button class="btn btn-outline-secondary" type="button" id="onypheApiKey"><i class="fa fa-key"></i></button>
+                  </div>
+                  <input type="text" class="form-control " id="onypheApiKey" name="onypheApiKey"  placeholder="Your Onyphe API Key" aria-describedby="onypheApiKey" value="{{standard.ONYPHE_API_KEY}}">
+                  {% if form.onypheApiKey.errors %}
+                  {% for error in form.onypheApiKey.errors %}
+                    <div class="invalid-feedback">
+                        {{error}}
+                    </div>
+                  {%endfor%}
+                {% endif %}
+                </div>
+            </div>
+            <br>
+            <hr>
+            <h4>PDNS Settings</h4>
+            <div class="input-group mb-3">
+               <label>
+               <b>Farsight</b>
+               </label>
+               <div class="input-group">
+                  <div class="input-group-append">
+                     <button class="btn btn-outline-secondary" type="button" id="farsightApiKey"><i class="fa fa-key"></i></button>
+                  </div>
+                  <input type="text" class="form-control " id="farsightApiKey" name="farsightApiKey"  placeholder="Your Farsight API Key" aria-describedby="farsightApiKey" value="{{standard.FARSIGHT_API_KEY}}">
+                  {% if form.farsightApiKey.errors %}
+                  {% for error in form.farsightApiKey.errors %}
+                    <div class="invalid-feedback">
+                        {{error}}
+                    </div>
+                  {%endfor%}
+                {% endif %}
+                </div>
+            </div>
+
+            <h4>Extra Settings</h4>
+            <div class="input-group mb-3">
+               <label>
+               <b>High Risk Ports</b>
+               </label>
+               <div class="input-group">
+                  <div class="input-group-append">
+                     <button class="btn btn-outline-secondary" type="button" id="highRiskPorts"><i class="fa fa-key"></i></button>
+                  </div>
+                  <input type="text" class="form-control " id="highRiskPorts" name="highRiskPorts"  placeholder="High Risk Port List (22, 21 . . .)" aria-describedby="highRiskPorts" value="{%for port in standard.HIGH_RISK_PORTS%}{%if loop.index == loop.length%}{{port}}{%else%}{{port}},{%endif%}{%endfor%}">
+                  {% if form.highRiskPorts.errors %}
+                  {% for error in form.highRiskPorts.errors %}
+                    <div class="invalid-feedback">
+                        {{error}}
+                    </div>
+                  {%endfor%}
+                {% endif %}
+                </div>
+            </div>
+            <div class="input-group mb-3">
+               <label>
+               <b>Base Location</b>
+               </label>
+               <div class="input-group">
+                  <div class="input-group-append">
+                     <button class="btn btn-outline-secondary" type="button" id="geoLocation"><i class="fa fa-key"></i></button>
+                  </div>
+                  <input type="text" class="form-control " id="geoLocation" name="geoLocation"  placeholder="Your Base Location" aria-describedby="geoLocation" value="{{standard.GEO_LOCATION}}" disabled>
+                  {% if form.geoLocation.errors %}
+                  {% for error in form.geoLocation.errors %}
+                    <div class="invalid-feedback">
+                        {{error}}
+                    </div>
+                  {%endfor%}
+                {% endif %}
+                </div>
+            </div>
+            <div class="row">
+               <div class="col pr-1">
+                  <button type="submit" class="btn btn-block btn-primary">Save</button>
+               </div>
+            </div>
+         </div>
+      </form>
+   </div>
+
+
+</div>
+
+{% endblock %}

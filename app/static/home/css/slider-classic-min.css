@@ -1,0 +1,81 @@
+.ui-rangeSlider {
+	height: 22px
+}
+
+.ui-rangeSlider .ui-rangeSlider-innerBar {
+	height: 20px;
+	background: #DDD
+}
+
+.ui-rangeSlider .ui-rangeSlider-handle {
+	width: 6px;
+	height: 22px;
+	background: #04598f;
+	cursor: col-resize
+}
+
+.ui-rangeSlider .ui-rangeSlider-bar {
+	margin: 1px 0;
+	background: rgb(5,120,193);
+	opacity: 15%;
+	height: 20px;
+	cursor: move;
+	cursor: grab;
+	cursor: -moz-grab
+}
+
+.ui-rangeSlider .ui-rangeSlider-bar.ui-draggable-dragging {
+	cursor: -moz-grabbing;
+	cursor: grabbing
+}
+
+.ui-rangeSlider-arrow {
+	height: 20px;
+	margin: 2px 0;
+	width: 16px;
+	background-repeat: no-repeat
+}
+
+.ui-rangeSlider-arrow.ui-rangeSlider-leftArrow {
+	content: "\f060";
+	position: center right;
+}
+
+.ui-rangeSlider-arrow.ui-rangeSlider-rightArrow {
+	content: "\f061";
+	position: center right;
+}
+
+.ui-rangeSlider-arrow-inner {
+	display: none
+}
+
+.ui-rangeSlider-container {
+	height: 20px
+}
+
+.ui-rangeSlider-withArrows .ui-rangeSlider-container {
+	margin: 0 11px
+}
+
+.ui-rangeSlider-noArrow .ui-rangeSlider-container {
+	margin: 0
+}
+
+.ui-rangeSlider-label {
+	 bottom: 35px;
+	 color: #fff;
+	 background: #0578c1;
+	 padding: 11px;
+	 font: bold 12px/1 arial;
+}
+
+.ui-rangeSlider-label-inner {
+	display: none
+}
+
+input.ui-editRangeSlider-inputValue {
+	width: 3em;
+	vertical-align: middle;
+	text-align: center
+}

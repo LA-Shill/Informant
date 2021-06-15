@@ -1,0 +1,289 @@
+{% extends 'layouts/base_template.html' %}
+{% set active_page = "Stat Overview" %}
+
+<style>
+
+  .card-margin {
+      margin-bottom: 1.875rem;
+  }
+  .card {
+      border: 0;
+      box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+      -webkit-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+      -moz-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+      -ms-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+  }
+  .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      word-wrap: break-word;
+      background-color: #ffffff;
+      background-clip: border-box;
+      border: 1px solid #e6e4e9;
+      border-radius: 8px;
+  }
+
+</style>
+
+
+{% block body %}
+{% include 'layouts/nav.html' %}
+<button class="btn btn-outline-none" style="margin-left:20px" type="button" onclick="window.location.href='{{ url_for('home_bp.overview', project_name=project_name) }}'"><i class="fa fa-arrow-left"></i></button>
+<div class="jumbotron vertical-center">
+  <div class="container text-center">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        Experimental Feature! This will not work if multiple scans have been run on the same day at different times!
+      <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+  </div>
+    <div class="col">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h1>IWS Platform Comparison</h1>
+                <canvas id="iws_comparison" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h1>Ports Exposure</h1>
+                <canvas id="port_comparison" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h1>5 Most Common Exposed Ports</h1>
+                <canvas id="port_comparison_common" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h1>CVE Overview</h1>
+                <canvas id="cves_total" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h1>Vulnerable Services By Port</h1>
+                <canvas id="vul_service_by_port" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card mb-3">
+            <div class="card-body">
+                <h1>Default CVEs</h1>
+                <canvas id="default_cves" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+    <script>
+
+
+    var dynamicColors = function() {
+            var r = Math.floor(Math.random() * 255);
+            var g = Math.floor(Math.random() * 255);
+            var b = Math.floor(Math.random() * 255);
+
+            let colours = ["rgba(" + r + "," + g + "," + b + ",0.2" + ")", "rgba(" + r + "," + g + "," + b + ",1" + ")"] 
+            return colours;
+        }
+
+    
+
+    // IWS Comparison
+    var ctx = document.getElementById('iws_comparison').getContext('2d');
+    var graph_01_values = {{graph_01['values']|safe}};
+    var graph_01_labels = {{graph_01['labels']|safe}};
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: graph_01_labels,
+            datasets: [{
+                label: 'Unique Assets',
+                data: graph_01_values,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(255, 206, 86, 0.2)',
+                    'rgba(34, 37, 39, 0.2)',
+                    'rgba(75, 192, 192, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(34, 37, 39, 1)',
+                    'rgba(75, 192, 192, 1)',
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+                
+            }
+        }
+    });
+
+    //  Port Comparison
+
+    var ctx = document.getElementById('port_comparison').getContext('2d');
+    var graph_02_values = {{graph_02['values']|safe}};
+    var graph_02_labels = {{graph_02['labels']|safe}};
+    var tmp = [];
+    var fill = [];
+    var border = [];
+    for (var i = 0; i < graph_02_labels.length; i++) {
+        tmp = dynamicColors();
+        fill.push(tmp[0]);
+        border.push(tmp[1]);
+    }
+    var myChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: graph_02_labels,
+            datasets: [{
+                data: graph_02_values,
+                backgroundColor: fill,
+                borderColor: border,
+                borderWidth: 1
+            }]
+        },
+    });
+
+
+    var ctx = document.getElementById('port_comparison_common').getContext('2d');
+    var graph_03_values = {{graph_03['values']|safe}};
+    var graph_03_labels = {{graph_03['labels']|safe}};
+    var tmp = [];
+    var fill = [];
+    var border = [];
+    for (var i = 0; i < graph_03_labels.length; i++) {
+        tmp = dynamicColors();
+        fill.push(tmp[0]);
+        border.push(tmp[1]);
+    }
+    var myChart = new Chart(ctx, {
+        type: 'polarArea',
+        data: {
+            labels: graph_03_labels,
+            datasets: [{
+                data: graph_03_values,
+                backgroundColor: fill,
+                borderColor: border,
+                borderWidth: 1
+            }]
+        },
+    });
+
+    var ctx = document.getElementById('cves_total').getContext('2d');
+    var graph_04_values = {{graph_04['values']|safe}};
+    var graph_04_labels = {{graph_04['labels']|safe}};
+    var tmp = [];
+    var fill = [];
+    var border = [];
+    for (var i = 0; i < graph_04_labels.length; i++) {
+        tmp = dynamicColors();
+        fill.push(tmp[0]);
+        border.push(tmp[1]);
+    }
+    var myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: graph_04_labels,
+            datasets: [{
+                label: 'CVES',
+                data: graph_04_values,
+                backgroundColor: fill,
+                borderColor: border,
+                borderWidth: 1
+            }]
+        },
+        
+    });
+
+
+    var ctx = document.getElementById('vul_service_by_port').getContext('2d');
+    var graph_05_values = {{graph_05['values']|safe}};
+    var graph_05_labels = {{graph_05['labels']|safe}};
+    var tmp = [];
+    var fill = [];
+    var border = [];
+    for (var i = 0; i < graph_05_labels.length; i++) {
+        tmp = dynamicColors();
+        fill.push(tmp[0]);
+        border.push(tmp[1]);
+    }
+    var myChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: graph_05_labels,
+            datasets: [{
+                label: 'Vulnerable Service',
+                data: graph_05_values,
+                backgroundColor: fill,
+                borderColor: border,
+                borderWidth: 1
+            }]
+        },
+    });
+
+
+    
+    var ctx = document.getElementById('default_cves').getContext('2d');
+    var graph_06_values = {{graph_06['values']|safe}};
+    var graph_06_labels = {{graph_06['labels']|safe}};
+    var tmp = [];
+    var fill = [];
+    var border = [];
+    for (var i = 0; i < graph_06_labels.length; i++) {
+        tmp = dynamicColors();
+        fill.push(tmp[0]);
+        border.push(tmp[1]);
+    }
+    var myChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: graph_06_labels,
+            datasets: [{
+                label: 'Default CVEs',
+                data: graph_06_values,
+                backgroundColor: fill,
+                borderColor: border,
+                borderWidth: 1
+            }]
+        },
+        options: {
+        scales: {
+            xAxes: [{
+                scaleLabel: {
+                    display: true,
+                    text: "Test"
+                }
+            }, ],
+            yAxes: [{
+                scaleLabel: {
+                    display: true,
+                    text: "Test"
+                }
+            }]
+        }
+    }
+    });
+   
+    </script>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,359 @@
+{% extends 'layouts/base_template.html' %}
+{% set active_page = "Index" %}
+
+
+<style>
+
+   .card-margin {
+       margin-bottom: 1.875rem;
+   }
+   .card {
+       border: 0;
+       box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+       -webkit-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+       -moz-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+       -ms-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+   }
+   .card {
+       position: relative;
+       display: flex;
+       flex-direction: column;
+       min-width: 0;
+       word-wrap: break-word;
+       background-color: #ffffff;
+       background-clip: border-box;
+       border: 1px solid #e6e4e9;
+       border-radius: 8px;
+   }
+   
+   .modal-content {
+    border-radius: 1rem
+}
+
+.modal-content:hover {
+    box-shadow: 2px 2px 2px black
+}
+
+.fa {
+    color: #2b84be;
+    font-size: 90px;
+    padding: 30px 0px
+}
+
+.b1 {
+    background-color: #2b84be;
+    box-shadow: 0px 4px #337095;
+    font-size: 17px
+}
+
+.r3 {
+    color: #c1c1c1;
+    font-weight: 500
+}
+
+</style>
+
+
+{% block body %}
+{% include 'layouts/nav.html' %}
+<div class="jumbotron vertical-center">
+   <div class="container text-center">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+ <h1>
+  <div class="typewrite" data-period="1500" data-type='[ "Hey there, did you know there is a cyber attack roughly every 39 seconds?", "43% of which target small business.", "Since COVID-19, the US FBI reported a 300% increase in reported cybercrimes.", "More than 77% of organizations do not have a Cyber Security Incident Response plan." ]'>
+   <span class="wrap"></span>
+  </div>
+</h1>
+      <div class="row">
+         <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+               <div class="card-body">
+                  <div class="row">
+                     <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Total Assets</h5>
+                        <span class="h2 font-weight-bold mb-0">{{stats['totalAssets']}}</span>
+                     </div>
+                     <div class="col-auto">
+                        <div class="icon icon-shape bg-primary text-white rounded-circle shadow">
+                           <i class="fas fa-server"></i>
+                        </div>
+                     </div>
+                  </div>
+                  <p class="mt-3 mb-0 text-muted text-sm">
+                     <span class="text-primary mr-2"> No change </span>
+                     <span class="text-nowrap">Since last scan</span>
+                  </p>
+               </div>
+            </div>
+         </div>
+         <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+               <div class="card-body">
+                  <div class="row">
+                     <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Secure Assets</h5>
+                        <span class="h2 font-weight-bold mb-0">{{stats['secureAssets']}}</span>
+                     </div>
+                     <div class="col-auto">
+                        <div class="icon icon-shape bg-success text-white rounded-circle shadow">
+                           <i class="fas fa-lock"></i>
+                        </div>
+                     </div>
+                  </div>
+                  <p class="mt-3 mb-0 text-muted text-sm">
+                     <span class="text-primary mr-2"> No change </span>
+                     <span class="text-nowrap">Since last scan</span>
+                  </p>
+               </div>
+            </div>
+         </div>
+         <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+               <div class="card-body">
+                  <div class="row">
+                     <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Identified Risks</h5>
+                        <span class="h2 font-weight-bold mb-0">{{stats['risks']}}</span>
+                     </div>
+                     <div class="col-auto">
+                        <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
+                           <i class="fas fa-lock-open"></i>
+                        </div>
+                     </div>
+                  </div>
+                  <p class="mt-3 mb-0 text-muted text-sm">
+                     <span class="text-primary mr-2"> No change </span>
+                     <span class="text-nowrap">Since last scan</span>
+                  </p>
+               </div>
+            </div>
+         </div>
+         <div class="col-xl-3 col-lg-6">
+            <div class="card card-stats mb-4 mb-xl-0">
+               <div class="card-body">
+                  <div class="row">
+                     <div class="col">
+                        <h5 class="card-title text-uppercase text-muted mb-0">Default Configs</h5>
+                        <span class="h2 font-weight-bold mb-0">{{stats['defaultVuls']}}</span>
+                     </div>
+                     <div class="col-auto">
+                        <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                           <i class="fas fa-skull-crossbones"></i>
+                        </div>
+                     </div>
+                  </div>
+                  <p class="mt-3 mb-0 text-muted text-sm">
+                     <span class="text-primary mr-2"> No change </span>
+                     <span class="text-nowrap">Since last scan</span>
+                  </p>
+               </div>
+            </div>
+         </div>
+      </div>
+      <h1 style="margin: 25px">Asset Discovery and Vulnerability Assessment </h1>
+      <form class="card card-sm" method="POST" action="/">
+         {{ form.csrf_token }}
+         <div class="card-body row no-gutters align-items-center" style="padding: 10px;">
+            <div class="col-auto">
+               <i class="fas fa-search  h4 text-body"></i>
+            </div>
+            <div class="col">
+               {{ form.scan_range(class='form-control form-control-lg form-control-borderless', placeholder='Enter a IP or CIDR') }}
+            </div>
+            <div class="col-auto">
+               <button class="btn btn-lg btn-primary" type="submit">Scan</button>
+            </div>
+            
+         <div class="col-auto">
+                        <div class="range-wrap" style="width: 100%;">
+               <span style="display:block;">Max Records</span>
+               <input type="range" class="range" min="1" max="1000" name="max_records" step="1" data-toggle="tooltip" data-placement="right" title="Max Record Limit">
+               <output class="bubble"></output>
+             </div>
+            <select class="selectpicker" id='options' name='options' title="Sources"  multiple data-selected-text-format="count > 2" data-count-selected-text="{0} Sources Selected">
+              <optgroup label="IWS">
+               <option >Shodan</option>
+               <option>Censys</option>
+               <option>BinaryEdge</option>
+               <option>Onyphe</option>
+              </optgroup>
+              <optgroup label="PDNS">
+               <option>ThreatCrowd</option>
+               <option>ThreatMiner</option>
+               <option>Robtex</option>
+               <option>Daloo</option>
+               <option>FarSight</option>
+               <option>DNSGrep</option>
+              </optgroup>
+            </select>
+            </div>
+            
+         </div>
+
+      </form>
+   
+      <p>Securing and keeping track of your digital assets is becoming increasingly challenging. We simplify this process. Combining asset discovery and risk assessment into one streamlined platform. </p>
+
+
+
+      <script>
+         const allRanges = document.querySelectorAll(".range-wrap");
+         allRanges.forEach(wrap => {
+         const range = wrap.querySelector(".range");
+         const bubble = wrap.querySelector(".bubble");
+
+         range.addEventListener("input", () => {
+            setBubble(range, bubble);
+         });
+         setBubble(range, bubble);
+         });
+
+         function setBubble(range, bubble) {
+         const val = range.value;
+         const min = range.min ? range.min : 0;
+         const max = range.max ? range.max : 100;
+         const newVal = Number(((val - min) * 100) / (max - min));
+         bubble.innerHTML = val;
+
+         // Sorta magic numbers based on size of the native UI thumb
+         bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
+         }
+         </script>
+
+
+
+
+
+
+
+      <div class="row">
+         <h2>Projects</h2>
+         <div class="owl-carousel owl-theme">
+            <div class="card" height="100%">
+               <div class="card-header px-4 pt-4">
+               </div>
+               <div class="card-body px-4 pt-2 mb-2">
+                  <h3>New <br> Project</h3>
+                  <div class="icon icon-shape bg-primary text-white rounded-circle shadow mb-2">
+                     <a class="btn btn-lg btn-primary" data-toggle="modal" data-target="#form" role="button"><i class="fas fa-4x fa-plus"></i></a>
+                  </div>
+               </div>
+            </div>
+            {% for scan in scans %}
+               <div class="card">
+                  <div class="card-header px-4 pt-4">
+                     <h5 class="card-title mb-0">{{scan['name']}}</h5>
+                  </div>
+                  <div class="card-body px-4 pt-2">
+                     <ul class="list-group">
+                        <li>
+                           <div class="row ">
+                              <div class="col ms-3">
+                                 <div class="icon icon-shape bg-primary text-white rounded-circle shadow">
+                                    <i class="fas fa-server"></i>
+                                 </div>
+                              </div>
+                              <div class="col mt-3 me-5">
+                                 <b>&nbsp;{{scan['totalAssets']}}</b>
+                              </div>
+                           </div>
+                        </li>
+                        <li>
+                           <div class="row mt-1" >
+                              <div class="col ms-3">
+                                 <div class="icon icon-shape bg-success text-white rounded-circle shadow">
+                                    <i class="fas fa-lock"></i>
+                                 </div>
+                              </div>
+                              <div class="col mt-3 me-5">
+                                 <b>&nbsp;{{scan['secureAssets']}}</b>
+                              </div>
+                           </div>
+                        </li>
+                        <li>                           
+                           <div class="row mt-1">
+                           <div class="col ms-3">
+                              <div class="icon icon-shape bg-warning text-white rounded-circle shadow">
+                                 <i class="fas fa-lock-open"></i>
+                              </div>
+                           </div>
+                           <div class="col mt-3 me-5">
+                              <b>&nbsp;{{scan['risks']}}</b>
+                           </div>
+                        </div></li>
+                        <li>                           
+                           <div class="row mt-1">
+                           <div class="col ms-3">
+                              <div class="icon icon-shape bg-danger text-white rounded-circle shadow">
+                                 <i class="fas fa-skull-crossbones"></i>
+                              </div>
+                           </div>
+                           <div class="col mt-3 me-5">
+                              <b>&nbsp;{{scan['defaultVuls']}}</b>
+                           </div>
+                        </div></li>
+                      </ul>
+                  </div>
+                  <a class="btn btn-lg btn-primary" href="{{ url_for('home_bp.overview', project_name=scan['name']) }}" role="button">View</a>
+            </div>
+            {% endfor %}
+          </div>
+      </div>
+
+     
+      <div class="modal fade" id="form" tabindex="-1" role="dialog" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered" role="document">
+             <div class="modal-content py-md-5 px-md-4 p-sm-3 p-4">
+                <h3>Project Setup</h3>
+                 <form method="POST" action="{{ url_for('home_bp.new_project') }}">
+                  {{ new_project.csrf_token }}
+                  <h5 class="card-title text-uppercase text-muted mt-2">Project Title <i data-tippy-content="Uniquely identifiable project name" class="fas fa-info-circle fa-xs"></i></h5>
+                  {{ new_project.project_name(class='form-control form-control-lg', placeholder='Your project name', style="text-align:center") }}
+                  <h5 class="card-title text-uppercase text-muted mt-2">Default Scan Range <i data-tippy-content="Valid IP or CIDR" class="fas fa-info-circle fa-xs"></i></h5>
+                  {{ new_project.scan_range(class='form-control form-control-lg', placeholder='Enter a IP or CIDR', style="text-align:center") }}
+                  <h5 class="card-title text-uppercase text-muted mt-2">Max Records <i data-tippy-content="Between 1 and 1000" class="fas fa-info-circle fa-xs"></i></h5>
+                  {{ new_project.max_records(class='form-control form-control-lg', placeholder='Max records', style="text-align:center") }}
+                  <p class="mt-2">Creating a project will not initialise a scan. All settings can be changed after a project is created.</p>
+                  <div class="text-center"> <button class="btn btn-primary w-50 rounded-pill b1 m-3" type="submit">Create</button> </div> <button data-dismiss="modal" class="btn btn-danger w-50 rounded-pill b1">Cancel</button>
+                 </form>
+             </div>
+         </div>
+      </div>
+
+<script>
+$('.owl-carousel').owlCarousel({
+    loop:false,
+    margin:10,
+    nav:false,
+    navText: ["<i class='fas fa-arrow-left'></i>","<i class='fas fa-arrow-right'></i>"],
+    responsiveClass:true,
+    responsive:{
+        0:{
+            items:1
+        },
+        600:{
+            items:3
+        },
+        1000:{
+            items:4
+        }
+    }
+})
+
+tippy('[data-tippy-content]');
+</script>
+
+
+   </div>
+</div>
+
+{% endblock %}

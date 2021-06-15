@@ -1,0 +1,10 @@
+export FLASK_APP=wsgi.py
+export SECRET_KEY=randomgenherebeforeproduction2021
+export SESSION_COOKIE_NAME=dev
+export DB_HOST=127.0.0.1
+export DB_PORT=27017
+export CORE_MONGO_DB="mongodb://127.0.0.1:27017/informant"
+export VUL_MONGO_DB="mongodb://127.0.0.1:27017/cvedb"
+export REDISTOGO_URL="redis://:password@127.0.0.1:6379/db"
+export TMP_FOLDER="C:\\Users\\USER\\Desktop\\INFORMANT\\tmp\\"
+flask run

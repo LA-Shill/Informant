@@ -1,0 +1,683 @@
+{% extends 'layouts/base_template.html' %}
+{% set active_page = "ip_addr_view" %}
+<style>
+    body {
+      background: yellow !important;
+    }
+    .card-margin {
+        margin-bottom: 1.875rem;
+    }
+    .card {
+        border: 0;
+        box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+        -webkit-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+        -moz-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+        -ms-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+    }
+    .card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: #ffffff;
+        background-clip: border-box;
+        border: 1px solid #e6e4e9;
+        border-radius: 8px;
+    }
+</style>
+
+{% block body %}
+{% include 'layouts/nav.html' %}
+<button class="btn btn-outline-none" style="margin-left:20px" type="button" onclick="window.location.href='{{ url_for('home_bp.overview', project_name=project_info['project_name']) }}'"><i class="fa fa-arrow-left"></i></button>
+<div class="jumbotron vertical-center">
+    <div class="container text-center">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <div style="margin: 15px">
+          <h1>{{project_info['project_name']}} </h1>
+          <div id="statustop"></div>
+      </div>
+      <div class="col">
+        <div class="card mb-3">
+          <h6 class="mt-2" >Timeline</h6>
+          <div class="mb-3" id="date_range_slider"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card mb-3">
+          <div class="row">
+            <div class="col">
+              <table class="table m-0">
+                <tbody>
+                  <tr>
+                    <th>IP:</th>
+                    <td>{{ip}}</td>
+                  </tr>
+                  <tr>
+                    <th>Current Timestamp:</th>
+                    <td id="timestamp_cur"></td>
+                  </tr>
+                  <tr>
+                    <th>First Seen:</th>
+                    <td id="first_seen"></td>
+                  </tr>
+                  <tr>
+                    <th>Last Seen:</th>
+                    <td id="last_seen"></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+              <div class="col-4">
+                <div class="col">
+                  
+                  <ul class="mt-1 list-group">
+                    <strong>Internet-wide Scanning Projects</strong>
+                    <li>
+                      <span class="badge text-white p-0 mt-2 mb-2">
+                        <span class="bg-secondary py-1 px-2 rounded-left">
+                          <i class="fas fa-fingerprint"></i> Shodan</span><span id="shodan" class="py-1 px-2 rounded-right bg-danger">Undetected</span>
+                        </span>
+                        
+                        <span class="badge text-white p-0 mt-2 mb-2">
+                          <span class="bg-secondary py-1 px-2 rounded-left">
+                            <i class="fas fa-fingerprint"></i> Censys</span><span id="censys" class="py-1 px-2 rounded-right bg-danger">Undetected</span>
+                        </span>
+                    </li>
+                    <li>
+                      <span class="badge text-white p-0 mt-1 mb-3">
+                        <span class="bg-secondary py-1 px-2 rounded-left">
+                          <i class="fas fa-fingerprint"></i> BinaryEdge</span><span id="binaryedge" class="py-1 px-2 rounded-right bg-danger">Undetected</span>
+                        </span>
+
+                        <span class="badge text-white p-0 mt-1 mb-3">
+                          <span class="bg-secondary py-1 px-2 rounded-left">
+                            <i class="fas fa-fingerprint"></i> Onyphe</span><span id="onyphe" class="py-1 px-2 rounded-right bg-danger">Undetected</span>
+                        </span>
+                    </li>
+
+                    <strong>Passive DNS</strong>
+                    <li>
+                      <span class="badge text-white p-0 mb-3">
+                        <span class="bg-secondary py-1 px-2 rounded-left">
+                          <i class="fas fa-fingerprint"></i> Robtex</span><span id="robtex" class="py-1 px-2 rounded-right bg-danger">Undetected</span>
+                      </span>
+
+                      <span class="badge text-white p-0 mt-1 mb-3">
+                        <span class="bg-secondary py-1 px-2 rounded-left">
+                          <i class="fas fa-fingerprint"></i> Daloo</span><span id="daloo" class="py-1 px-2 rounded-right bg-danger">Undetected</span>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="badge text-white p-0 mt-1 mb-3">
+                          <span class="bg-secondary py-1 px-2 rounded-left">
+                            <i class="fas fa-fingerprint"></i> FarSight</span><span id="farsight" class="py-1 px-2 rounded-right bg-danger">Undetected</span>
+                        </span>
+
+                        <span class="badge text-white p-0 mt-1 mb-3">
+                          <span class="bg-secondary py-1 px-2 rounded-left">
+                            <i class="fas fa-fingerprint"></i> DNSGrep</span><span id="dnsgrep" class="py-1 px-2 rounded-right bg-danger">Undetected</span>
+                        </span>
+                    </li>
+                    <li>
+                      <span class="badge text-white p-0 mt-1 mb-3">
+                        <span class="bg-secondary py-1 px-2 rounded-left">
+                          <i class="fas fa-fingerprint"></i> ThreatCrowd</span><span id="threatcrowd" class="py-1 px-2 rounded-right bg-danger">Undetected</span>
+                        </span>
+
+                        <span class="badge text-white p-0 mt-1 mb-3">
+                          <span class="bg-secondary py-1 px-2 rounded-left">
+                            <i class="fas fa-fingerprint"></i> ThreatMiner</span><span id="threatminer" class="py-1 px-2 rounded-right bg-danger">Undetected</span>
+                        </span>
+
+                    </li>
+                  </ul>
+              </div>
+              </div>
+          </div>          
+        </div>
+      </div>
+
+
+
+      
+        <div class="row">
+            <div class="col-mb3">
+                <div class="card">
+                    <div class="card-body bg-primary text-white summary-widget pb-0">
+                        <h2 class="text-white pb-3">Asset Summary</h2>
+                        <ul class="nav nav-tabs custom-tab border-bottom-0 mt-4" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="summary-tab" data-toggle="tab" aria-controls="summary" href="#summary" role="tab" aria-selected="true">
+                                    <span class="d-block d-md-none"><i class="ti-email"></i></span>
+                                    <span class="d-none d-md-block"> Summary</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="services-tab" data-toggle="tab" aria-controls="services" href="#services" role="tab" aria-selected="false">
+                                    <span class="d-block d-md-none"><i class="ti-export"></i></span>
+                                    <span class="d-none d-md-block"> Services</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="dns-tab" data-toggle="tab" aria-controls="dns" href="#dns" role="tab" aria-selected="false">
+                                    <span class="d-block d-md-none"><i class="ti-panel"></i></span>
+                                    <span class="d-none d-md-block"> DNS</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="risk-tab" data-toggle="tab" aria-controls="risks" href="#risks" role="tab" aria-selected="false">
+                                    <span class="d-block d-md-none"><i class="ti-trash"></i></span>
+                                    <span class="d-none d-md-block"> Risks</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+
+
+
+                    <div class="tab-content" id="myTabContent">
+
+                      <div class="tab-pane fade active show" id="summary" aria-labelledby="summary-tab" role="tabpanel">
+                        <div class="row p-3 text-dark">
+                            <div class="col-md-6">
+                              <table class="table user-view-table m-0">
+                                <tbody>
+                                  <tr>
+                                    <th>IP:</th>
+                                    <td>{{ip}}</td>
+                                  </tr>
+                                  <tr>
+                                    <th>Exposed Ports:</th>
+                                    <td id="ports"></td>
+                                  </tr>
+                                  <tr>
+                                    <th>Organisation:</th>
+                                    <td id="org"></td>
+                                  </tr>
+                                  <tr>
+                                    <th>Country:</th>
+                                    <td id="country"></td>
+                                  </tr>
+                                  <tr>
+                                    <th>Timestamp:</th>
+                                    <td id="timestamp"></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                            <div class="col-md-6">  
+                                <h3 id="scan_last_time" class="font-light">Latest scan data is <b class="text-success">fresh</b> </h3>
+                                <h4 id="scan_last_time2" class="font-light">Results inaccurate? Rescan</h4>
+                                <div class="icon icon-shape bg-secondary text-white rounded-circle shadow mb-2">
+                                  <a class="btn btn-lg btn-secondary"  href="{{ url_for('home_bp.overview', project_name=project_info['project_name']) }}" role="button"><i class="fas fa-4x fa-redo"></i></a>
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="tab-pane fade" id="services" aria-labelledby="services-tab" role="tabpanel">
+                            <div>
+                                <div class="row p-4 no-gutters align-items-center">
+                                    <div class="col-sm-12 col-md-6">
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table no-wrap table-hover v-middle mb-0 font-14">
+                                      <th>Timestamp</th>
+                                      <th>Manufacturer</th>
+                                      <th>Product</th>
+                                      <th>Version</th>
+                                      <th>Port</th>
+                                        <tbody id="service_table">
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="tab-pane fade" id="dns" aria-labelledby="dns-tab" role="tabpanel">
+                          <div>
+                              <div class="row p-4 no-gutters align-items-center">
+                                  <div class="col-sm-12 col-md-6">
+                                  </div>
+                              </div>
+                              <div class="table-responsive">
+                                  <table class="table no-wrap table-hover v-middle mb-0 font-14">
+                                    <th>Timestamp</th>
+                                    <th>ASN</th>
+                                    <th>Netname</th>
+                                    <th>IP</th>
+                                    <th>Domain</th>
+                                    <th>First Seen</th>
+                                    <th>Last Seen</th>
+                                    <th>Count</th>
+                                      <tbody id="dns_info">
+                                      </tbody>
+                                  </table>
+                              </div>
+                          </div>
+                      </div>
+
+
+                      <div class="tab-pane fade" id="risks" aria-labelledby="risks-tab" role="tabpanel">
+                        <div class="row p-3 text-dark">
+                          <div class="col-md-6">
+                            <table class="table user-view-table m-0">
+                              <tbody>
+                                <tr>
+                                  <th>Predicated Total rDDoS (BAF):</th>
+                                  <td id="rddos"></td>
+                                </tr>
+                                <tr>
+                                  <th>rDDoS Ports:</th>
+                                  <td id="rddos_ports"></td>
+                                </tr>
+                                <tr>
+                                  <th>High Risk Ports:</th>
+                                  <td id="r_ports"></td>
+                                </tr>
+                                <tr>
+                                  <th>Risky Services:</th>
+                                  <td id="r_services"></td>
+                                </tr>
+                                <tr>
+                                  <th>Default CVEs:</th>
+                                  <td id="default_vuls"></td>
+                                </tr>
+                                <tr>
+                                  <th>Total CVEs:</th>
+                                  <td id="cves_total"></td>
+                                </tr>
+                                <tr>
+                                  <th>Timestamp:</th>
+                                  <td id="r_timestamp"></td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                          <div class="col-md-6" id="rating_status">  
+                          </div>
+
+
+                          <div id="cve-table">
+
+                          </div>
+                          
+                      </div>
+                    </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      
+    </div>
+</div>
+
+
+
+
+<script>
+  setInterval(function(){$.ajax({
+      url: '/taskqueue',
+      type: 'POST',
+      success: function(response) {
+          var statustop = '';
+
+          if (response['scan_running']) {
+            statustop = '<span class="badge bg-warning my-2">System Busy</span>'
+          } else {
+            statustop = '<span class="badge bg-success my-2">System Ready</span>'
+          }
+          $("#statustop").html(statustop);
+      },
+      error: function(error) {
+          console.log(error);
+      }
+  })}, 1000);
+
+  $(document).ready(function () {
+    
+    // Full time range
+    var date_lr = "{{project_info['last_run']}}".split('-');
+    last_run = new Date(date_lr[0], date_lr[1] - 1, date_lr[2].substring(0, 2)); 
+
+    var date_lr = "{{project_info['created_at']}}".split('-');
+    first_run = new Date(date_lr[0], date_lr[1] - 1, (date_lr[2].substring(0, 2)) -1); 
+
+    // Default values
+    var date_lr = "{{last_run}}".split('-');
+    max_data = new Date(date_lr[0], date_lr[1] - 1, date_lr[2].substring(0, 2)); 
+
+    var date_lr = "{{first_run}}".split('-');
+    min_data = new Date(date_lr[0], date_lr[1] - 1, date_lr[2].substring(0, 2)); 
+
+
+    timeline_range = [min_data.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'}), max_data.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'})];
+    update()
+
+    $("#date_range_slider").dateRangeSlider(
+            { 
+              bounds: {
+                min: first_run, // first_run date
+                max: last_run  // last_run date
+              },
+              defaultValues:{
+                min: min_data, // last_run date
+                max: max_data  // last_run date
+              },
+              range:{
+                min: {days: 1},
+                max: {days: 30}
+              },
+              enabled: true
+            }
+          );
+
+    $("#date_range_slider").bind("valuesChanged", function(e, data){
+        timeline_range = [data.values.min.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'}), data.values.max.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'})]
+        update()
+      });
+    });
+
+function update() {
+  $.ajax({url: "/overview/{{project_info['project_name']}}/view/{{ip}}/data/" + timeline_range , type: 'POST', success: function(result){
+    if (result.length != 0) {
+      let merged_assets = []
+      let dns_assets = []
+      var cve_table = "<br><span style='font-weight: 900;'' class='m-4'>CVE Table</span><table id='cve_table' class='table dt-responsive table-striped dataTable m-0'><tbody><thead><tr><th>Service</th><th>CVE</th><th>CVSSv2 Score</th><th>Vector</th><th>Port</th><th>Confidence</th></tr></thead>";
+      // Reset all tags
+      $("#shodan").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#censys").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#binaryedge").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#onyphe").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#robtex").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#daloo").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#farsight").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#dnsgrep").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#threatcrowd").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#threatminer").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+
+      // Source check
+      for (i = 0; i < result.length; i++) {
+        if (result[i].hasOwnProperty('source')) {
+        switch(result[i]['source']) {
+          case "_shodan":
+            $("#shodan").removeClass('bg-danger');
+            $("#shodan").addClass('bg-success').html("Detected");
+            break;
+          case "_censys":
+            $("#censys").removeClass('bg-danger');
+            $("#censys").addClass('bg-success').html("Detected");
+            break;
+          case "_binaryedge":
+            $("#binaryedge").removeClass('bg-danger');
+            $("#binaryedge").addClass('bg-success').html("Detected");
+          case "_onyphe":
+            $("#onyphe").removeClass('bg-danger');
+            $("#onyphe").addClass('bg-success').html("Detected");
+            break;
+          case "_robtex":
+            $("#robtex").removeClass('bg-danger');
+            $("#robtex").addClass('bg-success').html("Detected");
+            break;
+            case "_daloo":
+            $("#daloo").removeClass('bg-danger');
+            $("#daloo").addClass('bg-success').html("Detected");
+            break;
+            case "_farsight":
+            $("#farsight").removeClass('bg-danger');
+            $("#farsight").addClass('bg-success').html("Detected");
+            break;
+            case "_dnsgrep":
+            $("#dnsgrep").removeClass('bg-danger');
+            $("#dnsgrep").addClass('bg-success').html("Detected");
+            break;
+            case "_threatcrowd":
+            $("#threatcrowd").removeClass('bg-danger');
+            $("#threatcrowd").addClass('bg-success').html("Detected");
+            break;
+            case "_threatminer":
+            $("#threatminer").removeClass('bg-danger');
+            $("#threatminer").addClass('bg-success').html("Detected");
+            break;
+          }
+
+          // Find relevant merged records
+          if (result[i]['source'] == 'merged') {
+            merged_assets.push(result[i])
+          }
+
+          // Find DNS record
+          if (result[i]['type'] == 'pdns') {
+            dns_assets.push(result[i])
+          }
+        }
+      }
+
+      // Find most recent timestamp merged
+      var lastest_date = new Date(Math.max.apply(null, merged_assets.map(function(e) {
+          return new Date(e.timestamp);
+      })));
+
+      // Find most recent timestamp DNS
+      var lastest_date_dns = new Date(Math.max.apply(null, dns_assets.map(function(e) {
+          return new Date(e.timestamp);
+      })));
+      
+      var pdns = ''
+      for (i = 0; i < dns_assets.length; i++) {
+        tmp = new Date(dns_assets[i]['timestamp'])
+        if(tmp.getTime() === lastest_date_dns.getTime()) {
+            pdns += '<tr><td>' + dns_assets[i]['timestamp'] + '</td>';
+            pdns += '<td>' + dns_assets[i]['asn'] + '</td>';
+            pdns += '<td>' + dns_assets[i]['netname'] + '</td>';
+            pdns += '<td>' + dns_assets[i]['ip'] + '</td>';
+            pdns += '<td>' + dns_assets[i]['domain'] + '</td>';
+            pdns += '<td>' + dns_assets[i]['first_seen'] + '</td>';
+            pdns += '<td>' + dns_assets[i]['last_seen'] + '</td>';
+            pdns += '<td>' + dns_assets[i]['count'] + '</td></tr>';
+
+        }
+      }
+      // DNS tab
+      $("#dns_info").html(pdns);
+
+
+      // Find most recent merged record
+      for (i = 0; i < merged_assets.length; i++) {
+        tmp = new Date(merged_assets[i]['timestamp'])
+        if(tmp.getTime() === lastest_date.getTime()) {
+          $("#country").html(merged_assets[i]['country']);
+          $("#org").html(merged_assets[i]['org']);
+
+          // Risk data
+          var h_ports = ''
+          var r_services = '';
+          var rddos_ports = [];
+          var rddos = 0
+          var default_vuls = 0;
+          if (merged_assets[i].hasOwnProperty('risks')) {
+            for (t = 0; t < merged_assets[i]['risks'].length; t++) {
+              if (merged_assets[i]['risks'][t].hasOwnProperty('ports')) {
+                // High risk port check
+                for (g = 0; g < merged_assets[i]['risks'][t]['ports'].length; g++) {
+                  if (g == (merged_assets[i]['risks'][t]['ports'].length - 1)) {
+                      h_ports += merged_assets[i]['risks'][t]['ports'][g];
+                    } else {
+                      h_ports += merged_assets[i]['risks'][t]['ports'][g] + ", ";
+                    }
+                }
+            }
+
+                // rDDoS
+                if (merged_assets[i]['risks'][t].hasOwnProperty('rddos')) {
+                  rddos = merged_assets[i]['risks'][t].rDDoS_BAF;
+                  rddos_ports = "<a href='https://www.speedguide.net/port.php?port=" + merged_assets[i]['risks'][t]['port'] + "' target='_blank'> " + merged_assets[i]['risks'][t]['port'] + "</a>";
+                }
+                // Default cve
+                if (merged_assets[i]['risks'][t].hasOwnProperty('default')) {
+                  default_vuls += 1;
+                }
+
+          }
+          $("#r_timestamp").html(merged_assets[i]['timestamp']);
+        }
+        $("#r_ports").html(h_ports);
+        $("#rddos_ports").html(rddos_ports);
+        $("#rddos").html(rddos);
+
+
+                // Risky Services
+                var r_services = '';
+                var total_cves = 0;
+                if (merged_assets[i].hasOwnProperty('cveData')) {
+                  for (x = 0; x < merged_assets[i]['cveData'].length; x++) {
+                      var tmp = ''
+                      total_cves += merged_assets[i]['cveData'][x].length;
+
+                      if ('manufacturer' in merged_assets[i]['cveData'][x][0]){
+                        tmp = ''
+                        tmp += merged_assets[i]['cveData'][x][0]['manufacturer'];
+                      }
+                      if ('product' in merged_assets[i]['cveData'][x][0]) {
+                        tmp += ' ' + merged_assets[i]['cveData'][x][0]['product'];
+                      }
+                      if ('version' in merged_assets[i]['cveData'][x][0]) {
+                        tmp += ' ' + merged_assets[i]['cveData'][x][0]['version'];
+                      }
+                      if ('port' in merged_assets[i]['cveData'][x][0]) {
+                        tmp += ' (' + merged_assets[i]['cveData'][x][0]['port'] + ') <br>';
+                      }
+                      r_services += tmp
+
+
+                      if (total_cves >= 1) {
+                        for (cve = 0; cve < merged_assets[i]['cveData'][x].length; cve++) {
+                          console.log(merged_assets[i]['cveData'][x][cve]['cve']);
+                          cve_table += "<tr><td>" + merged_assets[i]['cveData'][x][cve]['manufacturer'] + " " + merged_assets[i]['cveData'][x][cve]['product'] + " " + merged_assets[i]['cveData'][x][cve]['version']  + "</td>";
+                            console.log(merged_assets[i]['cveData'][x][cve]['vul_by_default']);
+                            if (merged_assets[i]['cveData'][x][cve]['vul_by_default'] == true) {
+                            cve_table +=  '<td> <a class="text-white text-decoration-none" target="_blank" href="https://nvd.nist.gov/vuln/detail/' + merged_assets[i]['cveData'][x][cve]['cve'] + '">' + '<span class="m-2 badge bg-danger my-2">DF (' + merged_assets[i]['cveData'][x][cve]['cve'] + ')</span></a><br>';
+                          } else {
+                            cve_table +=  '<td> <a class="text-white text-decoration-none" target="_blank" href="https://nvd.nist.gov/vuln/detail/' + merged_assets[i]['cveData'][x][cve]['cve'] + '">' + '<span class="m-2 badge bg-warning my-2">' + merged_assets[i]['cveData'][x][cve]['cve'] + '</span></a><br>';
+                          }
+                          cve_table +=  "<td>" +  merged_assets[i]['cveData'][x][cve]['cvss2'] + "</td>";
+                          cve_table +=  "<td>" +  merged_assets[i]['cveData'][x][cve]['vector'] + "</td>";
+                          cve_table +=  "<td>" +  merged_assets[i]['cveData'][x][cve]['port'] + "</td>";
+                          cve_table += "<td>" + merged_assets[i]['cveData'][x][cve]['cpe_score'] + "%</tr></td>";
+                        }
+                      }
+                  }
+                }
+                $("#r_services").html(r_services);
+                $("#cves_total").html(total_cves);
+                $("#default_vuls").html(default_vuls);
+
+
+
+          let ports = [];
+
+          for (y = 0; y < merged_assets[i]['ports'].length; y++) {
+            if (y == (merged_assets[i]['ports'].length - 1)) {
+              ports += merged_assets[i]['ports'][y]
+            } else {
+              ports += merged_assets[i]['ports'][y] + ", "
+            }
+          }
+          $("#ports").html(ports);
+          $("#timestamp").html(merged_assets[i]['timestamp']);
+          $("#timestamp_cur").html(merged_assets[i]['timestamp']);
+
+          var services = ''
+          for (z = 0; z < merged_assets[i]['banners'].length; z++) {
+            services += '<tr><td>' + merged_assets[i]['banners'][z]['timestamp'] + '</td>';
+            services += '<td>' + merged_assets[i]['banners'][z]['manufacturer'] + '</td>';
+            services += '<td>' + merged_assets[i]['banners'][z]['product'] + '</td>';
+            services += '<td>' + merged_assets[i]['banners'][z]['version'] + '</td>';
+            services += '<td>' + merged_assets[i]['banners'][z]['port'] + '</td></tr>';
+          }
+          // Services tab
+          $("#service_table").html(services);
+        }
+      }
+      cve_table += "</tbody></table>"
+      $("#cve-table").html(cve_table);
+
+
+      // Health status
+      if (r_services == '' && h_ports == '') {
+        $("#rating_status").html('<p style="font-size:100px">&#128513;</p> <p style="font-size:30px">Secure</p>');
+      } else {
+        $("#rating_status").html('<p style="font-size:100px">😡</p> <p style="font-size:30px">Risky Asset</p>');
+      }
+
+
+
+
+
+
+
+
+
+
+
+      // Summary message check
+      let today = new Date()
+
+      // Tinme and date conversion
+      var date_lr = "{{project_info['last_run']}}".split('-');
+      last_run_1 = new Date(date_lr[0], date_lr[1] - 1, date_lr[2].substring(0, 2), date_lr[2].substring(3, 5), date_lr[2].substring(6, 8), date_lr[2].substring(9, 11)); 
+      last_run_1.setHours(last_run_1.getHours() + 24);
+      
+      if (last_run_1 < today){
+        $("#scan_last_time").html("Last scan was over <b class='text-danger'>24 hours ago</b>");
+      }
+
+
+    } else {
+      $("#shodan").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#censys").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#binaryedge").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#onyphe").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#robtex").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#daloo").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#farsight").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#dnsgrep").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#threatcrowd").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#threatminer").removeClass('bg-success').addClass('bg-danger').html("Undetected");
+      $("#rddos").html("No data");
+      $("#rddos_ports").html("No data");
+      $("#r_services").html("No data");
+      $("#r_ports").html("No data");
+      $("#default_vuls").html("No data");
+      $("#r_timestamp").html("No data");
+      $("#country").html("No data");
+      $("#org").html("No data");
+      $("#ports").html("No data");
+      $("#timestamp").html("No data");
+      $("#service_table").html("");
+      $("#dns_info").html("");
+      $("#rating_status").html('<p style="font-size:100px">🥴</p> <p style="font-size:30px">You need to feed me some data!</p>');
+    }
+  }});
+}
+
+</script>
+  
+
+{% endblock %}

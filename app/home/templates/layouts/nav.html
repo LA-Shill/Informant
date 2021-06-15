@@ -1,0 +1,13 @@
+<nav class="navbar navbar-light">
+  <div class="container-fluid">
+     <a class="navbar-brand" href="{{ url_for('home_bp.home') }}">
+     <img src="{{ url_for('static', filename='home/img/logo.png') }}" alt="" class="d-inline-block align-top">
+     <span class="mb-0 h1">INFORMANT</span> 
+     <span class="mt-2" style="text-transform: uppercase;">{{title}}</span>
+     </a>
+     <ul class="navbar-nav ml-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('home_bp.settings') }}"><i class="fa fa-cog"></i> </a></li>
+        <li class="nav-item"><a target="_blank" class="nav-link" href="https://github.com/LA-Shill"><i class="fab fa-github"></i> </a></li>
+     </ul>
+  </div>
+</nav>

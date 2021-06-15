@@ -1,0 +1,160 @@
+/*
+  Name:     style.css
+  By:       LA-Shill
+  Date:     01.09.2020
+  Version   0.7
+*/
+
+@import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
+
+/* Core Elements */
+html, body {
+  height: 100%;
+  background-color: #f7f7fc;
+}
+
+.jumbotron.vertical-center {
+  margin-bottom: 0; 
+}
+
+.vertical-center {
+  min-height: 100%;  /* Fallback for vh unit */
+  min-height: 100vh; 
+
+  /* flex container */
+  display: -webkit-box;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex; 
+  
+  /* Align  bootstrap's container vertically */
+    -webkit-box-align : center;
+  -webkit-align-items : center;
+       -moz-box-align : center;
+       -ms-flex-align : center;
+          align-items : center;
+  
+  /* legacy web browser support */
+  width: 100%;
+  
+         -webkit-box-pack : center;
+            -moz-box-pack : center;
+            -ms-flex-pack : center;
+  -webkit-justify-content : center;
+          justify-content : center;
+}
+
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  outline: none;
+  list-style: none;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.navbar .navbar-brand {
+  padding: 10px;
+  align-items: center;
+  display: flex;
+}
+
+.navbar .navbar-brand img {
+  height: 50px;
+  width: 50px;
+  margin-right: 5px;
+}
+
+.icon {
+  width: 3rem;
+  height: 3rem;
+}
+
+.icon i {
+  font-size: 2.25rem;
+}
+
+.icon-shape {
+  display: inline-flex;
+  padding: 12px;
+  text-align: center;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-shape i {
+  font-size: 1.25rem;
+}
+.card-stats .card-body {
+  padding: 1rem 1.5rem;
+}
+
+.card-subtitle, .card-title {
+    font-weight: 400;
+}
+.card-title {
+    font-size: .875rem;
+    color: #495057;
+}
+.card {
+    margin: 20px;
+    box-shadow: 0 0 0.875rem 0 rgba(33,37,41,.05);
+}
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: initial;
+    border: 0 solid transparent;
+    border-radius: .25rem;
+}
+.card-body {
+    flex: 1 1 auto;
+    padding: 1.25rem;
+}
+
+.card-header:first-child {
+    border-radius: .25rem .25rem 0 0;
+}
+.card-header {
+    border-bottom-width: 1px;
+}
+.pb-0 {
+    padding-bottom: 0!important;
+}
+.card-header {
+    padding: 1rem 1.25rem;
+    margin-bottom: 0;
+    background-color: #fff;
+    border-bottom: 0 solid transparent;
+}
+
+.form-control-borderless {
+    border: none;
+}
+
+.form-control-borderless:hover, .form-control-borderless:active, .form-control-borderless:focus {
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+.summary-widget .custom-tab .nav-item .nav-link {
+  border: 0 !important;
+  color: #fff !important;
+  border-bottom: 3px solid transparent !important;
+  }
+  
+.summary-widget .custom-tab .nav-item .nav-link.active {
+    background: 0 0 !important;
+    color: #fff !important;
+    border-bottom: 3px solid #2cd07e !important;
+}
+.no-wrap td, .no-wrap th {
+    white-space: nowrap;
+}

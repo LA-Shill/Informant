@@ -1,0 +1,485 @@
+{% extends 'layouts/base_template.html' %}
+{% set active_page = "Overview" %}
+
+<style>
+
+    .card-margin {
+        margin-bottom: 1.875rem;
+    }
+    .card {
+        border: 0;
+        box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+        -webkit-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+        -moz-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+        -ms-box-shadow: 0px 0px 10px 0px rgba(82, 63, 105, 0.1);
+    }
+    .card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        word-wrap: break-word;
+        background-color: #ffffff;
+        background-clip: border-box;
+        border: 1px solid #e6e4e9;
+        border-radius: 8px;
+    }
+    
+    td.details-control {
+            text-align:center;
+            color:forestgreen;
+    cursor: pointer;
+    }
+    tr.shown td.details-control {
+        text-align:center; 
+        color:red;
+    }
+</style>
+
+{% block body %}
+{% include 'layouts/nav.html' %}
+<button class="btn btn-outline-none" style="margin-left:20px" type="button" onclick="window.location.href='{{ url_for('home_bp.overview', project_name=scan_name) }}'"><i class="fa fa-arrow-left"></i></button>
+<div class="jumbotron vertical-center">
+    <div class="container text-center">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    <div style="margin: 15px">
+        <h1>{{scan_name}} </h1>
+        <div class="mb-5" id="statustop"></div>
+    </div>
+    <div class="col">
+    <div class="card mb-3">
+      <h6 class="mt-2" >Timeline</h6>
+      <div class="mb-3" id="date_range_slider"></div>
+    </div>
+  </div>
+    <div class="row">
+      <div class="col">
+         <div class="card card-stats mb-4 mb-xl-0">
+            <div class="card-body">
+               <div class="row">
+                  <div class="col">
+                     <h5 class="card-title text-uppercase text-muted mb-0">Total Scans</h5>
+                     <span id="total_scans" class="h2 font-weight-bold mb-0"></span>
+                  </div>
+                  <div class="col-auto">
+                     <div class="icon icon-shape bg-primary text-white rounded-circle shadow">
+                        <i class="fas fa-server"></i>
+                     </div>
+                  </div>
+               </div>
+               <p class="mt-3 mb-0 text-muted text-sm">
+
+               </p>
+            </div>
+         </div>
+      </div>
+      <div class="col">
+         <div class="card card-stats mb-4 mb-xl-0">
+            <div class="card-body">
+               <div class="row">
+                  <div class="col">
+                     <h5 class="card-title text-uppercase text-muted mb-0">Total Assets</h5>
+                     <span id="total_assets" class="h2 font-weight-bold mb-0"></span>
+                  </div>
+                  <div class="col-auto">
+                     <div class="icon icon-shape bg-success text-white rounded-circle shadow">
+                        <i class="fas fa-lock"></i>
+                     </div>
+                  </div>
+               </div>
+               <p class="mt-3 mb-0 text-muted text-sm">
+
+               </p>
+            </div>
+         </div>
+      </div>
+   </div>
+ <!--
+   <div class="col">
+    <div class="card mb-3">
+    {% if graph != '' %}
+    <div id="mynetwork" style="height: 500px"></div>
+    <div id="loadingBar">
+          <div class="outerBorder">
+             <div id="text"></div>
+             <div id="border">
+                   <div id="bar"></div>
+             </div>
+          </div>
+       </div>
+       </div>
+    {% endif %}
+ </div>
+
+ -->
+
+ 
+<div class="col">
+  <div class="card mb-3">
+        <div class="card-body">
+        
+                   <div class="result-header">
+                        <div class="row">
+                            <div class="col-lg-12">
+                              <div class="dropdown">
+                                <button type="button"  id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="btn btn-soft-base btn-icon dropdown-toggle">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        class="feather feather-grid"
+                                    >
+                                        <rect x="3" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="3" width="7" height="7"></rect>
+                                        <rect x="14" y="14" width="7" height="7"></rect>
+                                        <rect x="3" y="14" width="7" height="7"></rect>
+                                    </svg>
+                                </button>
+                              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                               <a class="dropdown-item" id="iws_export" href="">Export Data</a>
+                              </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>		<h3>IWS Results</h3>
+                   <table width="100%" class="table table-striped table-responsive dataTable no-footer dtr-inline" id="example"  cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Timestamp</th>
+                            <th>IP</th>
+                            <th>ASN</th>
+                            <th>Domains</th>
+                            <th>Organisation</th>
+                            <th>Country</th>
+                            <th>OS</th>
+                            <th>Ports</th>
+                            <th>Banners</th>
+                        </tr>
+                    </thead>
+                  </table>
+        </div>
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+  var timeline_range = []
+  
+  $(document).ready(function () {
+
+      
+      var rawDB = {{data|safe}};
+
+      var date_lr = "{{last_run}}".split('-');
+      last_run = new Date(date_lr[0], date_lr[1] - 1, date_lr[2].substring(0, 2)); 
+
+      var date_lr = "{{first_run}}".split('-');
+      first_run = new Date(date_lr[0], date_lr[1] - 1, (date_lr[2].substring(0, 2)) -1); 
+
+      timeline_range = [first_run.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'}), last_run.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'})];
+      $("#date_range_slider").dateRangeSlider(
+          { 
+            bounds: {
+              min: first_run, // first_run date
+              max: last_run  // last_run date
+            },
+            defaultValues:{
+              min: first_run, // last_run date
+              max: last_run  // last_run date
+            },
+            range:{
+              min: {days: 1},
+              max: {days: 30}
+            },
+            enabled: true
+          }
+        );
+
+      var table = $('#example').DataTable({
+          "language": {
+              "emptyTable": "No IWS Records Detected."
+          },
+          "dom": 'lfrtip',
+          bProcessing: true,
+          bServerSide: true,
+          sPaginationType: "full_numbers",
+          lengthMenu: [[50, 100, 250, 500], [50, 100, 250, 500]],
+          bjQueryUI: true,
+          sAjaxSource: '/tables/IWS_1/{{scan_name}}/' + timeline_range,
+          "columns": [
+              {
+                  "className": 'details-control',
+                  "orderable": false,
+                  "data": null,
+                  "defaultContent": '',
+                  "render": function () {
+                      return '<i class="fa fa-plus-square" aria-hidden="true"></i>';
+                  },
+                  width:"15px"
+              },
+              {"data": "Timestamp",
+                "render": function(data)
+                    {
+                      return data;
+                    }
+                },
+                  {"data": "IP",
+                "render": function(data)
+                    {
+                      return '<a href="/overview/{{scan_name}}/view/' + data + '/' + timeline_range + '">' + data + '<a/>';
+                    }
+                },
+              { "data": "ASN" },
+              { "data": "Domains",
+                "render": function(data)
+                    {
+                      var domain = '';
+                        if (data) {
+                          if (data.constructor === Array) {
+                            for (i = 0; i < data.length; i++) {
+                              domain += data[i] + "<br>";
+                            }
+                          } else {
+                            domain = data;
+                          }
+                            return domain;
+                        } else {
+                            return ' ';
+                        }
+                    }
+                },
+              { "data": "Organisation" },
+              { "data": "Country"},
+              { "data": "OS",
+                "render": function(data)
+                    {
+                      var os = '';
+                        if (data) {
+                          if (data.constructor === Array) {
+                            for (i = 0; i < data.length; i++) {
+                              os += data[i] + "<br>";
+                            }
+                          } else {
+                            os = data;
+                          }
+                            return os;
+                        } else {
+                            return ' ';
+                        }
+                    }
+                },
+                { "data": "Ports",
+                "render": function(data)
+                    {
+                      var os = '';
+                        if (data) {
+                            for (i = 0; i < data.length; i++) {
+                              os += data[i] + "<br>";
+                            }
+                            return os;
+                        } else {
+                            return ' ';
+                        }
+                    }
+                },
+                {"data": "Services",
+                "render": function(data)
+                    {
+                      var html = '';
+                      for (var y  = 0; y < data.length; y++){
+                        html += '<td>' + data[y].product + ' ' + data[y].version + ' (' + data[y].port + ')' + '</td></tr><br>';
+                      }
+                      return html;
+                    }
+                },
+          ],
+      });
+
+      $("#date_range_slider").bind("valuesChanged", function(e, data){
+          timeline_range = [data.values.min.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'}), data.values.max.toLocaleString([], {year: 'numeric', month: 'numeric', day: 'numeric'})]
+          // Update stats
+          $.ajax({url: "/stats/{{scan_name}}/IWS_1/" + timeline_range, type: 'POST', success: function(result){
+            console.log(result)
+            $("#total_assets").html(result['stats']['totalAssets']);
+            $("#iws_export").attr('href','/export/{{scan_name}}/iws_all/' + timeline_range);
+            $("#total_scans").html(result['stats']['totalScans']);
+          }});
+
+          table.ajax.url('/tables/IWS_1/{{scan_name}}/' + timeline_range).load();
+          //table.ajax.reload();
+        });
+      
+        // Update stats
+        $.ajax({url: "/stats/{{scan_name}}/IWS_1/" + timeline_range, type: 'POST', success: function(result){
+            console.log(result)
+            $("#total_assets").html(result['stats']['totalAssets']);
+            $("#iws_export").attr('href','/export/{{scan_name}}/iws_all/' + timeline_range);
+            $("#total_scans").html(result['stats']['totalScans']);
+          }});
+
+      // Add event listener for opening and closing details
+      $('#example tbody').on('click', 'td.details-control', function () {
+          var tr = $(this).closest('tr');
+          var tdi = tr.find("i.fa");
+          //var data = table.rows().data().toArray()
+          var row = table.row(tr)
+          var value = row.data()
+          ip = value.IP
+          time_s = value.Timestamp
+          if (row.child.isShown()) {
+              // This row is already open - close it
+              row.child.hide();
+              tr.removeClass('shown');
+              tdi.first().removeClass('fa-minus-square');
+              tdi.first().addClass('fa-plus-square');
+          }
+          else {
+              // Open this row
+              row.child(format(rawDB, ip, time_s)).show();
+              tr.addClass('shown');
+              tdi.first().removeClass('fa-plus-square');
+              tdi.first().addClass('fa-minus-square');
+          }
+      });
+
+      table.on("user-select", function (e, dt, type, cell, originalEvent) {
+          if ($(cell.node()).hasClass("details-control")) {
+              e.preventDefault();
+          }
+      });
+  });
+
+ function format(d, value, time_s){
+      var rows = [];
+      var date1 = Date.parse(timeline_range[0]);
+      var date2 = Date.parse(timeline_range[1]);
+      var tmpDate2 = time_s.substring(0, time_s.length-3);
+      // Add other checks  && tmpDate > date1 && tmpDate < date2
+      tmpDate2 = Date.parse(tmpDate2);
+      for (i = 0; i < d.length; i++){
+        var tmpDate = d[i]['timestamp'];
+        tmpDate = Date.parse(tmpDate);
+        if (d[i]['ip'] == value){
+          console.log("1: ", tmpDate)
+          console.log("2: ", tmpDate2)
+          console.log(d[i])
+          if(tmpDate == tmpDate2 || tmpDate > date1 && tmpDate < date2) {
+            rows.push(d[i])
+          }
+        }
+      }
+
+      var html = '<table class="table table-hover mb-0" <thead> <tr> <th scope="col">Source</th> <th scope="col">ASN</th> <th scope="col">IP Address</th> <th scope="col">Domains</th> <th scope="col">Organisation</th> <th scope="col">Country</th> <th scope="col">OS</th> <th scope="col">Ports</th> <th scope="col">Services </th> </tr> </thead><tbody>'
+      for (i = 0; i < rows.length; i++){
+        html += '<tr><td>' + rows[i].source + '</td>'
+        html += '<td>' + rows[i].asn + '</td>'
+        html += '<td>' + rows[i].ip + '</td>'
+        if (typeof rows[i].domains  === "undefined") {
+          html += '<td>' + '</td>'
+        } else {
+          html += '<td>'
+          for (var y  = 0; y < rows[i].domains.length; y++){
+            html += rows[i].domains[y]  + '<br>'; 
+          }
+          html += '</td>'
+        }
+        if (typeof rows[i].org  === "undefined") {
+          html += '<td>' + '</td>'
+        } else {
+          html += '<td>' + rows[i].org + '</td>'
+        }
+        if (typeof rows[i].country  === "undefined") {
+          html += '<td>' + '</td>'
+        } else {
+          html += '<td>' + rows[i].country + '</td>'
+        }
+        if (typeof rows[i].os  === "undefined") {
+          html += '<td>' + '</td>'
+        } else {
+          html += '<td>' + rows[i].os + '</td>'
+        }
+        if (typeof rows[i].ports  === "undefined") {
+          html += '<td>' + '</td>'
+        } else {
+          html += '<td>' + rows[i].ports + '</td>'
+        }
+        html += '<td>'
+        for (var y  = 0; y < rows[i].banners.length; y++){
+          html += rows[i].banners[y].product + ' ' + rows[i].banners[y].version + ' (' + rows[i].banners[y].port + ')'  + '<br>'; 
+        }
+        html += '</td></tr>'
+        console.log(rows[i].banners)
+      }
+      html += '</tbody></table>'
+
+      return html
+ }
+</script>
+
+
+<script>
+  setInterval(function(){$.ajax({
+      url: '/taskqueue',
+      type: 'POST',
+      success: function(response) {
+          var i = 0;
+          var html, color, clear, running, statustop = '';
+          var d = new Date().toLocaleString()
+
+          if (response['scan_running']) {
+            html+= '<tr><td><div class="icon icon-shape bg-success text-white rounded-circle shadow"><i class="fas fa-check-circle"></i></div></td><td><span class="mt-3"> System is busy! A scan is in progress! </span></td><td><span class="mt-3 badge bg-success">Running</span></td></tr>'
+            statustop = '<span class="badge bg-warning my-2">System Busy</span>'
+          } else {
+            statustop = '<span class="badge bg-success my-2">System Ready</span>'
+          }
+
+          if (response["jobs"].length > 0) {
+            for (i = 0; i < response["jobs"].length; i++) {
+              if(response["jobs"][i]["icon"] == 'redo'){
+                color = 'secondary'
+              } else {
+                color = 'dark'
+              }
+              if(response["jobs"][i]["host"] == '{{scan_name}}'){
+                clear = '<form style="float:right;"action="/clearscans/{{scan_name}}" method="POST"> <button value="" name="key" class="btn btn-danger btn-sm d-none d-sm-inline-block" type="submit"><i class="fas fa-ban"></i></button></form>'
+                html+= '<tr><td><div class="icon icon-shape bg-' + color + ' text-white rounded-circle shadow"><i class="fas fa-' + response["jobs"][i]["icon"] + '"></i></div></td><td>' + response["jobs"][i]["created_at"] + '</td><td><span class="mt-3 badge bg-success">'+ response["jobs"][i]["state"] + '</span></td></tr>'
+              }
+            }
+
+
+            if (!html && response['scan_running'] == False){
+              html += '<tr><td><div class="icon icon-shape bg-info text-white rounded-circle shadow"><i class="fas fa-stopwatch"></i></div></td><td><span class="mt-3">' + d + '</span></td><td>Queue Size: <span class="mt-3 badge bg-info">' + response["jobs"].length + '</span></td></tr>'
+              }
+
+          } else {
+            html += '<tr><td><div class="icon icon-shape bg-warning text-white rounded-circle shadow"><i class="fas fa-times"></i></div></td><td><span class="mt-3">' + d + '</span></td><td><span class="mt-3 badge bg-warning">Empty Queue</span></td></tr>'
+          }
+          $("#queue").html(html);
+          $("#clear").html(clear);
+          $("#statustop").html(statustop);
+      },
+      error: function(error) {
+          console.log(error);
+      }
+  })}, 1000);
+</script>
+
+
+{% endblock %}

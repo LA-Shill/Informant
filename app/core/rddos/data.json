@@ -1,0 +1,112 @@
+{
+   "rddos":[
+      {
+         "protocol":"DNS",
+         "port": 53,
+         "baf_min": 28,
+         "baf_max": 54
+      },
+      {
+         "protocol":"NTP",
+         "port": 123,
+         "baf_min": 556.9,
+         "baf_max": 556.9
+      },
+      {
+         "protocol":"SNMPv2",
+         "port": 162,
+         "baf_min": 6.3,
+         "baf_max": 6.3
+      },
+      {
+         "protocol":"NetBIOS",
+         "port": [445, 139],
+         "baf_min": 3.8,
+         "baf_max": 3.8
+      },
+      {
+         "protocol":"SSDP",
+         "port": 1900,
+         "baf_min": 30.8,
+         "baf_max": 30.8
+      },
+      {
+         "protocol":"CharGEN",
+         "port": 19,
+         "baf_min": 358.8,
+         "baf_max": 358.8
+      },
+      {
+         "protocol":"QOTD",
+         "port": 17,
+         "baf_min": 140.3,
+         "baf_max": 140.3
+      },
+      {
+         "protocol":"BitTorrent",
+         "port": 6881,
+         "baf_min": 3.8,
+         "baf_max": 3.8
+      },
+      {
+         "protocol":"Kad",
+         "port": 4672,
+         "baf_min": 16.3,
+         "baf_max": 16.3
+      },
+      {
+         "protocol":"Quake Network Protocol",
+         "port": 26000,
+         "baf_min": 63.9,
+         "baf_max": 63.9
+      },
+      {
+         "protocol":"Multicast DNS (mDNS)",
+         "port": 5353,
+         "baf_min": 2,
+         "baf_max": 10
+      },
+      {
+         "protocol":"RIPv1",
+         "port": 520,
+         "baf_min": 131.24,
+         "baf_max": 131.24
+      },
+      {
+         "protocol":"Portmap",
+         "port": 111,
+         "baf_min": 2,
+         "baf_max": 10
+      },
+      {
+         "protocol":"LDAP",
+         "port": 389,
+         "baf_min": 2,
+         "baf_max": 10
+      },
+      {
+         "protocol":"CLDAP",
+         "port": 636,
+         "baf_min": 56,
+         "baf_max": 70
+      },
+      {
+         "protocol":"TFTP",
+         "port": 69,
+         "baf_min": 60,
+         "baf_max": 60
+      },
+      {
+         "protocol":"Memcached",
+         "port": 11211,
+         "baf_min": 10000,
+         "baf_max": 51000
+      },
+      {
+         "protocol":"WS-Discovery",
+         "port": 3702,
+         "baf_min": 10,
+         "baf_max": 500
+      }
+   ]
+}

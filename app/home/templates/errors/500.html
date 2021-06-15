@@ -1,0 +1,19 @@
+{% extends 'layouts/base_template.html' %}
+{% set active_page = "500" %}
+{% include 'layouts/nav.html' %}
+{% block body %}
+<body id="page-top">
+            <div id="content">
+                <nav class="navbar navbar-light navbar-expand bg-white shadow mb-4 topbar static-top">
+                    <div class="container-fluid"><button class="btn btn-link d-md-none rounded-circle mr-3" id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button></div>
+                </nav>
+                <div class="container-fluid">
+                    <div class="text-center mt-5">
+                        <div class="error mx-auto" data-text="404">
+                            <p class="m-0">500</p>
+                        </div>
+                        <p class="text-dark mb-5 lead">Internal Server Error</p>
+                        <p class="text-black-50 mb-0">It looks like you found a glitch in the matrix...</p><a href="/">← Back to Dashboard</a></div>
+                </div>
+            </div>
+{% endblock %}
