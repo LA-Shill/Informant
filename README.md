@@ -25,7 +25,11 @@ This tool's indirect detection methods used to retrieve asset information ensure
 
 <p align="center">
 Please be aware that the project is currently in <b>early</b> development and should be treated as such, with the experimental vulnerable by default configuration flagging feature being in its infancy. This project was intended to be an academic proof of concept, which is reflected in the quality of the code. However, large sections of code are currently being re-written to improve the overall readability and performance of the codebase.
+</p>
 
+<p align="center">
+  Research surrounding the tool can be found <a target="_blank" href="https://github.com/LA-Shill/Informant-Research">here</a>.
+  
 ## Table of Contents
 
 * [Getting Started](#getting-started)
@@ -91,9 +95,12 @@ sudo systemctl start mongodb
 ```
 
 2. Install [cve-search](https://github.com/cve-search/cve-search) and populate MongoDB (timely process . . .)  
-_note **cve-search** is designed to work on **Linux only** - However can be adapted for **Windows**, get in touch if you need a hand._
+_note **cve-search** is designed to work on **Linux only** - However can be adapted for **Windows**, get in touch if you need a hand. This entire step can be skipped however the tool will not be able to conduct the known vulnerability identification process._
 
 ```bash
+# Download repo 
+sudo git clone https://github.com/cve-search/cve-search.git
+
 # Install dependencies
 sudo pip3 install -r requirements.txt
 
@@ -130,13 +137,13 @@ cd Informant
 sudo pip3 install -r requirements.txt
 ```
 
-5.  Configure the following parameters within the default .env file according to your setup
+5.  Configure the following parameters within the default .env file according to your setup (in most instances the configure below will work straight out of the box but is highly insecure)
 ```bash
 DB_HOST= 127.0.0.1
 DB_PORT= 27017
 CORE_MONGO_DB= "mongodb://127.0.0.1:27017/core"
 VUL_MONGO_DB= "mongodb://127.0.0.1:27017/cvedb"
-REDISTOGO_URL= "redis://:PASSWORD@127.0.0.1:6379/dev"
+REDISTOGO_URL= "redis://:@127.0.0.1:6379/dev"
 ```
 
 
@@ -146,7 +153,7 @@ REDISTOGO_URL= "redis://:PASSWORD@127.0.0.1:6379/dev"
 
 2. Performance deteriorates significantly when handling multiple millions of records. This is being worked on as a priority, with multiple solutions already in the works.
 
-3. The active based fraudulent geolocation feature is currently disabled and will be re-enabled in the next major patch. All operational methods within Informant do <b>not</b> directly connect with target networks.
+3. The active based fraudulent geolocation feature is currently disabled and will be re-enabled in the next major patch. All operational methods within Informant follow the CAR process and do <b>not</b> directly connect with target networks.
 
 4. Percentage change statistics are currently disabled. This functionality will be re-enabled during the next major code overhaul due to performance issues.
 
@@ -155,7 +162,7 @@ REDISTOGO_URL= "redis://:PASSWORD@127.0.0.1:6379/dev"
 ## Usage
 ### Startup
 
-1. Create a worker
+1. Create a worker (preferably run this in the background using screen)
 ```bash
 # Start RQ worker (redis)
 # Please note that the REDISTOGO_URL must be set in memory! Alternatively replace line #13 in the worker.py script with your correct connection details.
@@ -163,7 +170,7 @@ python3 worker.py
 ```
 2. Start the development server
 ```bash
-# Start dev web server on 127.0.0.1:5000
+# Start dev web server on local address(s) (port is modifiable within the wsgi.py file and a app.ini file is provided for use with third-party web servers such as Nginx)
 python3 wsgi.py
 ```
 
