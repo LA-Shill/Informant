@@ -384,6 +384,12 @@ def project_del(project_name):
         if project_del.validate_on_submit():
             if (project_del.project_name.data == project_name):
                 try:
+                    # Wipe job queue
+                    for job in q.jobs:
+                        if project_name in job.id:
+                            job.cancel()
+
+                    # Delete data
                     mainDB.db.drop_collection(project_name)
                 except Exception as e:
                     print("Error on project deletion: " + str(e))

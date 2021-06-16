@@ -65,7 +65,7 @@ class CensysHandler:
         """
         try:
             self.results = list(self.api.search(query, fields=self.searchFields, max_records=max_records))
-        except (CensysRateLimitExceededException, CensysJSONDecodeException, CensysNotFoundException, CensysUnauthorizedException) as apiErr:
+        except Exception as apiErr:
             print(f"[CENSYS] Censys API error: {apiErr}")
         except AttributeError as apiNotDefined:
             print(f"[CENSYS] Censys API was not initialized: {apiNotDefined}")

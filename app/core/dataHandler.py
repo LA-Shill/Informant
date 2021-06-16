@@ -47,6 +47,7 @@ from ipwhois import IPWhois
 from netaddr import IPNetwork
 from datetime import datetime, timedelta
 import ipaddress
+import platform
 
 # Setup database
 client = pymongo.MongoClient(StandardValues.DB_HOST, StandardValues.DB_PORT)
@@ -276,9 +277,10 @@ def map_data(data, server_color="#da03b3", hostname_color="#03DAC6", edge_color=
     g.force_atlas_2based(overlap=0.5, gravity=-200, central_gravity=0.01, spring_length=120, damping=1)
     #g.hrepulsion(node_distance=150)
     g.toggle_physics(True)
-    g.write_html("./tmp/graph_latest.html")
+    file = './tmp/graph_latest.html' if platform.system().lower()=='windows' else './tmp/graph_latest.html'
+    g.write_html(file)
     # Read in html file and filter out script data for graph
-    data = codecs.open("./tmp/graph_latest.html", "r", "utf-8")
+    data = codecs.open(file, "r", "utf-8")
     soup = BeautifulSoup(data, 'html.parser')
     graph = (soup.find('script', text = re.compile('drawGraph')))
     # Copy graph JS into flask dynamic page, pass in like nav items + need to dump DB and create JSON file first
@@ -320,7 +322,7 @@ def generate_node_network(project_name, time_min, time_max):
         assets['assets'] = json_data_list
     
     # Save file
-    file = "./tmp/graph_data.json"
+    file = './tmp/graph_data.json' if platform.system().lower()=='windows' else './tmp/graph_data.json'
 
     with open(file, 'w') as outfile:
         json.dump(assets, outfile)
