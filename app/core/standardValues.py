@@ -1,8 +1,8 @@
 # !/usr/bin/env python
 # Name:     standardValues.py
 # By:       LA-Shill
-# Date:     21.04.2021
-# Version   0.2
+# Date:     25.01.2022
+# Version   0.3
 # -----------------------------------------------
 
 import pymongo
@@ -48,8 +48,7 @@ class StandardValues:
     HIGH_RISK_PORTS: list = db_r[0]['HIGH_RISK_PORTS']
     GEO_LOCATION: str = db_r[0]['GEO_LOCATION']
 
-    CENSYS_DEFAULT_RESULTS_QUANTITY: int = 100000
-    CENSYS_FREE_PLAN_RESULTS_QUANTITY: int = 1000
+    CENSYS_DEFAULT_RESULTS_QUANTITY: int = 10000
     SHODAN_DEFAULT_RESULTS_QUANTITY: int = 10
     BINARYEDGE_DEFAULT_RESULTS_PAGE: int = 1
 
