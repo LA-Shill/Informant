@@ -1,150 +1,56 @@
 # !/usr/bin/env python
 # Name:     censysClass.py
 # By:       LA-Shill
-# Date:     30.09.2020
-# Version   0.1
+# Date:     25.01.2022
+# Version   0.2
 # -----------------------------------------------
 
 # TODO: Limitations with Censys implementation, write own API wrapper from scratch when time allows
+# Hotfix applied to supported Censys v2 API. However, this has broken the usefulness of the banner data.
 
 # Import libraries
-from censys.ipv4 import CensysIPv4
-from censys.base import (
-    CensysRateLimitExceededException,
-    CensysJSONDecodeException,
-    CensysException
-)
-from datetime import datetime
+from censys.search import CensysHosts
+import os
+import math
 
 # Import settings
 from ..standardValues import StandardValues
+
+# Set enviroment variables for Censys API Wrapper
+os.environ["CENSYS_API_ID"] = StandardValues.CENSYS_API_ID
+os.environ["CENSYS_API_SECRET"] = StandardValues.CENSYS_API_SECRET
 
 class CensysHandler:
     """
     Main class to retrieve information from Censys API.
     """
-    def __init__(self, api_id: str = StandardValues.CENSYS_API_ID, api_secret: str = StandardValues.CENSYS_API_SECRET):
+    def __init__(self):
         """
         Initialize Censys Search Engine API
         """
         try:
-            self.api = CensysIPv4(api_id=api_id, api_secret=api_secret)
+            self.api = CensysHosts()
             print("[CENSYS] Censys successfully authenticated.")
-        except CensysException as apiErr:
-            print(f"[CENSYS] Censys API error: {apiErr}")
+        except Exception as e:
+            print(f"[CENSYS] Censys API error: {e}")
 
         self.results: list = []
         self.censys_device_list: list = []
         self.resultTotal: int = 0
-        self.searchFields = [
-            "ip",
-            "autonomous_system.asn",
-            "location.country",
-            "ports",
-            "protocols",
-            "metadata.os_description",
-            "21.ftp.banner.metadata.manufacturer",
-            "21.ftp.banner.metadata.product",
-            "21.ftp.banner.metadata.version",
-            "143.imap.starttls.metadata.product",
-            "80.http.get.metadata.manufacturer",
-            "80.http.get.metadata.product",
-            "80.http.get.metadata.version",
-            "22.ssh.v2.metadata.manufacturer",
-            "22.ssh.v2.metadata.product",
-            "22.ssh.v2.metadata.version",
-            "443.https.get.metadata.manufacturer",
-            "443.https.get.metadata.product",
-            "443.https.get.metadata.version",
-            "updated_at"
-        ]
         
     def search(self, query: str, max_records: int = StandardValues.CENSYS_DEFAULT_RESULTS_QUANTITY):
         """
         Function used to search hosts using Censys
         """
         try:
-            self.results = list(self.api.search(query, fields=self.searchFields, max_records=max_records))
-        except Exception as apiErr:
-            print(f"[CENSYS] Censys API error: {apiErr}")
-        except AttributeError as apiNotDefined:
-            print(f"[CENSYS] Censys API was not initialized: {apiNotDefined}")
-        except CensysException as resultsExceeded:
-            if "Only the first 1,000 search results are available" in str(resultsExceeded):
-                print("[CENSYS] Only the first 1,000 search results are available. Retry search with 1,000 results limit.")
-                self.search(query, max_records=StandardValues.CENSYS_FREE_PLAN_RESULTS_QUANTITY)
+            if max_records < 100:
+                self.results = list(self.api.search(query, per_page=max_records))
             else:
-                print(f"[CENSYS] Censys API core exception: {resultsExceeded}")
+                pages = math.ceil(max_records/100)
+                self.results = list(self.api.search(query, per_page=100, pages=pages))
+        except Exception as e:
+            print(f"[CENSYS] Censys API error: {e}")
         self.resultTotal = len(self.results)
-
-
-    def banner_grabber(self, index):
-        """
-        Function to sort service banner data
-        """
-
-        services: list = []
-        banners = {
-            "port": '',
-            "manufacturer": '',
-            "product": '',
-            "version": '',
-            "timestamp": ''
-        }
-
-        timestamp = datetime.strptime(self.results[index].get('updated_at', '0000-00-00T00:00:00+00:00'), "%Y-%m-%dT%H:%M:%S+%f:00")
-        
-        if ('21.ftp.banner.metadata.manufacturer' in self.results[index] or '21.ftp.banner.metadata.product' in self.results[index] or '21.ftp.banner.metadata.version' in self.results[index]) :
-            banners['port'] = 21
-            banners['manufacturer'] = self.results[index].get('21.ftp.banner.metadata.manufacturer', '')
-            banners['product'] = self.results[index].get('21.ftp.banner.metadata.product', '')
-            banners['version'] = self.results[index].get('21.ftp.banner.metadata.version', '')
-            banners['timestamp'] = str(timestamp)
-            services.append(banners.copy())
-
-
-        if ('80.http.get.metadata.manufacturer' in self.results[index] or '80.http.get.metadata.product' in self.results[index] or '80.http.get.metadata.version' in self.results[index]):
-            banners['port'] = 80
-            banners['manufacturer'] = self.results[index].get('80.http.get.metadata.manufacturer', '')
-            banners['product'] = self.results[index].get('80.http.get.metadata.product', '')
-            banners['version'] = self.results[index].get('80.http.get.metadata.version', '')
-            banners['timestamp'] = str(timestamp)
-            services.append(banners.copy())
-
-
-        if ('443.https.get.metadata.manufacturer' in self.results[index] or '443.https.get.metadata.product'  in self.results[index] or '443.https.get.metadata.version' in self.results[index]) :
-            banners['port'] = 443
-            banners['manufacturer'] = self.results[index].get('443.https.get.metadata.manufacturer', '')
-            banners['product'] = self.results[index].get('443.https.get.metadata.product', '')
-            banners['version'] = self.results[index].get('443.https.get.metadata.version', '')
-            banners['timestamp'] = str(timestamp)
-            services.append(banners.copy())
-
-        if ('22.ssh.v2.metadata.manufacturer' in self.results[index] or '22.ssh.v2.metadata.product' in self.results[index] or '22.ssh.v2.metadata.version' in self.results[index]) :
-            banners['port'] = 22
-            banners['manufacturer'] = self.results[index].get('22.ssh.v2.metadata.manufacturer', '')
-            banners['product'] = self.results[index].get('22.ssh.v2.metadata.product', '')
-            banners['version'] = self.results[index].get('22.ssh.v2.metadata.version', '')
-            banners['timestamp'] = str(timestamp)
-            services.append(banners.copy())
-
-        if ('110.pop3.starttls.metadata.manufacturer' in self.results[index] or '110.pop3.starttls.metadata.product' in self.results[index] or '110.pop3.starttls.metadata.version' in self.results[index]) :
-            banners['port'] = 110
-            banners['manufacturer'] = self.results[index].get('110.pop3.starttls.metadata.manufacturer', '')
-            banners['product'] = self.results[index].get('110.pop3.starttls.metadata.product', '')
-            banners['version'] = self.results[index].get('110.pop3.starttls.metadata.version', '')
-            banners['timestamp'] = str(timestamp)
-            services.append(banners.copy())
-        
-        if ('143.imap.starttls.metadata.manufacturer' in self.results[index] or '143.imap.starttls.metadata.product' in self.results[index] or '143.imap.starttls.metadata.version') in self.results[index] :
-            banners['port'] = 143
-            banners['manufacturer'] = self.results[index].get('143.imap.starttls.metadata.manufacturer', '')
-            banners['product'] = self.results[index].get('143.imap.starttls.metadata.product', '')
-            banners['version'] = self.results[index].get('143.imap.starttls.metadata.version', '')
-            banners['timestamp'] = str(timestamp)
-            services.append(banners.copy())
-
-        return services
 
 
     def formatted_results(self):
@@ -154,18 +60,39 @@ class CensysHandler:
         
         tmp_censys_device_list: list = []
 
-        for i in range(len(self.results)):
+        for i in range(len(self.results[0])):
             CENSYS_FIELDS = {
                 'source' : "_censys",
-                'ip' : str(self.results[i].get('ip', "unknown")),
-                'asn': str(self.results[i].get('autonomous_system.asn', "unknown")), 
-                'country' : str(self.results[i].get('location.country', "unknown")),
-                'ports': self.results[i].get('ports', "unknown"),
-                'protocols': self.results[i].get('protocols', "unknown"),
-                'os': self.results[i].get('metadata.os_description', "unknown"),
-                'banners': self.banner_grabber(i)
+                'ip' : str(self.results[0][i].get('ip', "unknown")),
+                'asn': str(self.results[0][i]['autonomous_system'].get('asn', "unknown")), 
+                'country' : str(self.results[0][i]['location'].get('country', "unknown")),
+                'ports': [],
+                'os': 'unknown',
+                'banners': []
                 }
 
+            if 'operating_system' in self.results[0][i]:
+                CENSYS_FIELDS['os'] = self.results[0][i].get('operating_system').get('product', "unknown")
+        
+            if 'services' in self.results[0][i]:
+                ports = []
+                services: list = []
+
+                for service_int in range (len(self.results[0][i]['services'])):
+                    ports.append(self.results[0][i]['services'][service_int].get('port', "unknown"))
+                    banner = {
+                    "port": self.results[0][i]['services'][service_int].get('port', "unknown"),
+                    "manufacturer": '',
+                    "product": self.results[0][i]['services'][service_int].get('service_name', "unknown"),
+                    "version": '',
+                    "timestamp": ''
+                    }
+                    services.append(banner.copy())
+                    
+            CENSYS_FIELDS['ports'] = ports
+            CENSYS_FIELDS['banners'] = services
+            
+                
             tmp_censys_device_list.append(CENSYS_FIELDS)
 
         # Remove duplicates from list
@@ -189,9 +116,8 @@ class CensysHandler:
         """
         return self.resultTotal
 
-
     def account_stats(self):
         """
-        Function to return account stats
+        Function to return total amount of results
         """
         return self.api.account()
