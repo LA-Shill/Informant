@@ -1,6 +1,6 @@
 beautifulsoup4==4.9.3
 bs4==0.0.1
-censys==1.1.1
+censys==2.1.2
 dnsdb==0.2.5
 dnspython==2.0.0
 Flask==1.1.2
