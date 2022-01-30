@@ -1,8 +1,8 @@
 # !/usr/bin/env python
 # Name:     dataHandler.py
 # By:       LA-Shill
-# Date:     20.04.2020
-# Version   0.6
+# Date:     30.01.2022
+# Version   0.6.1
 # -----------------------------------------------
 
 # Import module handlers
@@ -137,7 +137,6 @@ def port_flag_check(scan_range):
     totalAssets, secureAssets, riskyAssets, defaultConfig = overview_total_stats(project_data[0]['project_name'], 'IWS_1', timeline)
     mainDB[project_data[0]['project_name']].update_one({"project_name": project_data[0]['project_name']}, {"$set": {'last_stats': {'totalAssets': totalAssets, 'secureAssets' : secureAssets, 'risks': riskyAssets, 'defaultConfig' : defaultConfig}}}) 
 
-
     data = list(mainDB[scan_range].find({"source": 'merged'}).sort("timestamp", -1))
     assets = []
     filteredAssets = []
@@ -157,7 +156,6 @@ def port_flag_check(scan_range):
             
         validAssets.append(min(tempRecords, key=lambda x:abs(x['timestamp'] - project_data[0]['last_run'])))
 
-    bulk = mainDB[scan_range].initialize_unordered_bulk_op()
     settings = mainDB['settings'].find({}).limit(1)
 
     for setting in settings:
@@ -168,7 +166,7 @@ def port_flag_check(scan_range):
         if 'risks' in record:
             for issue in record['risks']:
                 if 'ports' in issue:
-                    bulk.find({"_id": record['_id']}).update({"$unset": {"risks": 1}})
+                    mainDB[scan_range].bulk_write([UpdateOne({"_id": record['_id']}, {"$unset": {"risks": 1}})], ordered=False)
                     
         if record['source'] == "merged":
             flagged = []
@@ -176,11 +174,7 @@ def port_flag_check(scan_range):
                 if (port in ports):
                     flagged.append(port)
                     portDict = {'ports' : flagged}
-                    bulk.find({"_id": record['_id']}).update({"$push": {"risks": portDict.copy()}})
-    try:
-        r = bulk.execute()
-    except Exception as e:
-        print("Flag port check status: " + str(e))
+                    mainDB[scan_range].bulk_write([UpdateOne({"_id": record['_id']}, {"$push": {"risks": portDict.copy()}})], ordered=False)
     
     save_project_stats(scan_range) 
 
@@ -206,17 +200,11 @@ def flag_check(scan_range, main_asn):
     data = mainDB[scan_range].find({"type" : 'pdns'}) 
     #data = latest_records(data_tmp, project_data[0])
 
-    bulk = mainDB[scan_range].initialize_unordered_bulk_op()
-
     for record in data:
         if 'asn' in record and record['asn'] != main_asn :
-            bulk.find({"ip": record['ip']}).update({"$set": {"flagged": True}})
+            mainDB[scan_range].bulk_write([UpdateOne({"ip": record['ip']},{"$set": {"flagged": True}})], ordered=False)
         if (record['ip'].islower() or record['ip'].isupper()):
-            bulk.find({"ip": record['ip']}).update({"$set": {"cname": True}})
-    try:
-        r = bulk.execute()
-    except Exception as e:
-        print("Flag pdns check status: " + str(e))
+            mainDB[scan_range].bulk_write([UpdateOne({"ip": record['ip']},{"$set": {"cname": True}})], ordered=False)
         
     save_project_stats(scan_range) 
 
@@ -252,13 +240,11 @@ def location_verification(scan_range, origin):
         for asset in mainDB[scan_range].find({}):
             mainDB[scan_range].update_one({"_id": asset['_id']},{"$unset": {"risks": 1}}, upsert=False)
         
-    bulk = mainDB[scan_range].initialize_unordered_bulk_op()
     for asset in mainDB[scan_range].find({}):
         if asset['source'] == "merged":
             verification = validate_loc(host=asset['ip'], orign=origin, dest=asset['country'])
             ver = {'verification' : verification}
-            bulk.find({"_id": asset['_id']}).update({"$push": {"risks": ver.copy()}})
-    r = bulk.execute()
+            mainDB[scan_range].bulk_write([UpdateOne({"_id": asset['_id']}, {"$push": {"risks": ver.copy()}})], ordered=False)
 
 
 def map_data(data, server_color="#da03b3", hostname_color="#03DAC6", edge_color="#018786", server_shape="database", hostname_shape="ellipse", debug=False):
