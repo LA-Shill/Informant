@@ -15,6 +15,7 @@ import socket
 from pymongo import UpdateMany, UpdateOne
 import time
 import pprint
+from ipwhois import IPWhois
 
 # Setup database
 client = pymongo.MongoClient(StandardValues.DB_HOST, StandardValues.DB_PORT)
