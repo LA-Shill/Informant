@@ -11,7 +11,7 @@ itsdangerous==1.1.0
 netaddr==0.8.0
 pybinaryedge==0.5
 PyJWT==1.5.3
-pymongo==3.11.3
+pymongo==4.0.1
 python-dotenv==0.17.0
 pyvis==0.1.9
 rapidfuzz==1.4.1
