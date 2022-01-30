@@ -1,8 +1,8 @@
 # !/usr/bin/env python
 # Name:     standardValues.py
 # By:       LA-Shill
-# Date:     25.01.2022
-# Version   0.3
+# Date:     30.01.2022
+# Version   0.3.1
 # -----------------------------------------------
 
 import pymongo
@@ -23,7 +23,7 @@ client = pymongo.MongoClient(host, port)
 mainDB = client[CORE_MONGO_DB.rsplit('/', 1)[-1]]
 
 try:
-    if mainDB['settings'].find({}).count() > 0:
+    if mainDB['settings'].count_documents({}) > 0:
         print("[INFORMANT] Settings DB file detected")
     else:
         settings = {'CENSYS_API_ID' : '', 'CENSYS_API_SECRET' : '', 'SHODAN_API_KEY' : '', 'BINARY_EDGE_API_KEY' : '', 'ONYPHE_API_KEY' : '', 'FARSIGHT_API_KEY' : '', 'HIGH_RISK_PORTS' : [], 'GEO_LOCATION' : ''}
