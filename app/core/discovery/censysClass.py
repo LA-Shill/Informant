@@ -1,17 +1,19 @@
 # !/usr/bin/env python
 # Name:     censysClass.py
 # By:       LA-Shill
-# Date:     25.01.2022
-# Version   0.2
+# Date:     02.02.2022
+# Version   0.21
 # -----------------------------------------------
 
 # TODO: Limitations with Censys implementation, write own API wrapper from scratch when time allows
-# Hotfix applied to supported Censys v2 API. However, this has broken the usefulness of the banner data.
+# Hotfix applied to supported Censys v2 API
+
 
 # Import libraries
 from censys.search import CensysHosts
 import os
 import math
+from datetime import datetime
 
 # Import settings
 from ..standardValues import StandardValues
@@ -57,7 +59,7 @@ class CensysHandler:
         """
         Return formatted results
         """
-        
+
         tmp_censys_device_list: list = []
 
         for i in range(len(self.results[0])):
@@ -67,17 +69,36 @@ class CensysHandler:
                 'asn': str(self.results[0][i]['autonomous_system'].get('asn', "unknown")), 
                 'country' : str(self.results[0][i]['location'].get('country', "unknown")),
                 'ports': [],
-                'os': 'unknown',
+                'os': '',
                 'banners': []
                 }
 
             if 'operating_system' in self.results[0][i]:
                 CENSYS_FIELDS['os'] = self.results[0][i].get('operating_system').get('product', "unknown")
-        
+            
             if 'services' in self.results[0][i]:
                 ports = []
                 services: list = []
 
+                # Fetch further serivce info on host
+                query = self.api.view(self.results[0][i].get('ip'))
+
+                if 'services' in query:
+                    for service in query['services']:
+                        ports.append(service['port'])
+                        port = service['port']
+                        if 'software' in service:
+                            tmp_stamp = datetime.strptime(query.get('last_updated_at', '1970-01-01T00:00:00.000000'), "%Y-%m-%dT%H:%M:%S.%fZ")
+                            banner = {
+                            "port": port,
+                            "manufacturer": service['software'][0].get('vendor', 'unknown'),
+                            "product": service['software'][0].get('product', 'unknown'),
+                            "version": service['software'][0].get('version', 'unknown'),
+                            "timestamp": str(tmp_stamp.strftime("%Y-%m-%d %H:%M:%S"))
+                            }
+                        services.append(banner.copy())
+                """
+                # This just uses one API endpoint not two (fetches less banner data but uses far less credits)
                 for service_int in range (len(self.results[0][i]['services'])):
                     ports.append(self.results[0][i]['services'][service_int].get('port', "unknown"))
                     banner = {
@@ -88,6 +109,7 @@ class CensysHandler:
                     "timestamp": ''
                     }
                     services.append(banner.copy())
+                """
                     
             CENSYS_FIELDS['ports'] = ports
             CENSYS_FIELDS['banners'] = services
